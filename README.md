@@ -67,4 +67,4 @@ Google Drive 등 동기화 제품은 의존성이 아닙니다. 설치 여부, �
 
 개발 환경은 mise로 관리합니다. [개발 환경 설정](docs/development.md)을 참고하세요.
 
-Go module: `github.com/twotwobread/learning-wiki`. npm scope는 `@twotwobread`를 잠정 사용하며 소유권·배포 권한 확인 필요. 패키지는 공개 배포 승인 전까지 `private: true` 유지.
+Go module: `github.com/twotwobread/learning-wiki`. npm scope는 사용자 계정에 맞춘 `@suyoung9137` 사용. CLI 로그인·배포 권한은 배포 전 확인 필요. 패키지는 공개 배포 승인 전까지 `private: true` 유지.

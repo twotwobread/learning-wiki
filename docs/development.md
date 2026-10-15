@@ -42,7 +42,7 @@ mise exec -- npm --version
 github.com/twotwobread/learning-wiki
 ```
 
-CLI 명령 처리는 Cobra 사용. 의존성 버전·해시는 `go.mod`와 `go.sum`으로 관리. npm scope는 `@twotwobread` 잠정 사용 (권한 미확인, 레지스트리 미배포).
+CLI 명령 처리는 Cobra 사용. 의존성 버전·해시는 `go.mod`와 `go.sum`으로 관리. npm scope는 `@suyoung9137` 사용 (사용자명 확인, CLI 인증·배포 권한 미확인, 레지스트리 미배포).
 
 ## CLI 실행·빌드
 

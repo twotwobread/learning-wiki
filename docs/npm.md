@@ -2,11 +2,11 @@
 
 ## 상태
 
-- 패키지명은 잠정적으로 `@twotwobread/learning-wiki`, `@twotwobread/learning-wiki-linux-x64` 사용
+- 사용자 계정명에 맞춰 `@suyoung9137/learning-wiki`, `@suyoung9137/learning-wiki-linux-x64` 사용
 - 실제 npm 계정·scope 권한 미확인, 레지스트리 미배포
 - 우발적 배포 방지를 위해 두 패키지 모두 `private: true`
 - 자체 코드의 배포 라이선스 결정 전까지 `UNLICENSED`. 공개 배포 전 권한·라이선스·private 설정 검토 필요
-- 지금은 로컬 tarball로 설치·실행 가능. `npx @twotwobread/learning-wiki`의 레지스트리 설치는 아직 사용 불가
+- 지금은 로컬 tarball로 설치·실행 가능. `npx @suyoung9137/learning-wiki`의 레지스트리 설치는 아직 사용 불가
 
 ## 구조
 
@@ -47,8 +47,8 @@ mise exec -- npm run test:package
 
 ```bash
 npm install --offline --ignore-scripts --no-audit --no-fund \
-  /absolute/path/to/dist/twotwobread-learning-wiki-linux-x64-0.1.0.tgz \
-  /absolute/path/to/dist/twotwobread-learning-wiki-0.1.0.tgz
+  /absolute/path/to/dist/suyoung9137-learning-wiki-linux-x64-0.1.0.tgz \
+  /absolute/path/to/dist/suyoung9137-learning-wiki-0.1.0.tgz
 npx --offline --no-install learning-wiki --version
 npx --offline --no-install learning-wiki init
 ```

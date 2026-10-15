@@ -25,9 +25,9 @@ async function fixture(t, body = 'process.stdout.write(JSON.stringify(process.ar
   const launcher = join(dir, 'bin/learning-wiki.cjs');
   await mkdir(join(dir, 'bin'));
   await copyFile(new URL('../npm/learning-wiki/bin/learning-wiki.cjs', import.meta.url), launcher);
-  const binaryDir = join(dir, 'node_modules/@twotwobread/learning-wiki-linux-x64');
+  const binaryDir = join(dir, 'node_modules/@suyoung9137/learning-wiki-linux-x64');
   await mkdir(join(binaryDir, 'bin'), { recursive: true });
-  await writeFile(join(binaryDir, 'package.json'), JSON.stringify({ name: '@twotwobread/learning-wiki-linux-x64', version: '0.1.0' }));
+  await writeFile(join(binaryDir, 'package.json'), JSON.stringify({ name: '@suyoung9137/learning-wiki-linux-x64', version: '0.1.0' }));
   await writeFile(join(binaryDir, 'bin/learning-wiki'), `#!/usr/bin/env node\n${body}\n`, { mode: 0o755 });
   return launcher;
 }

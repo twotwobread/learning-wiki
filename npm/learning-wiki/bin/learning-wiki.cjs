@@ -9,7 +9,7 @@ function resolveBinary(platform = process.platform, arch = process.arch, resolve
     throw Object.assign(new Error(`Unsupported platform ${platform}/${arch}. Run inside WSL Linux x64, not Windows PowerShell.`), { code: 'UNSUPPORTED_PLATFORM' });
   }
   try {
-    return resolve('@twotwobread/learning-wiki-linux-x64/bin/learning-wiki');
+    return resolve('@suyoung9137/learning-wiki-linux-x64/bin/learning-wiki');
   } catch (cause) {
     throw Object.assign(new Error('Linux x64 binary package is missing. Reinstall with optional dependencies enabled (--include=optional).', { cause }), { code: 'MISSING_BINARY_PACKAGE' });
   }

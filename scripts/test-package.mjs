@@ -16,7 +16,7 @@ try {
   const env = { ...process.env, HOME: home, XDG_CONFIG_HOME: join(home, 'config'), npm_config_cache: join(temp, 'npm-cache') };
   const packed = artifacts.map(a => join(root, 'dist', a.file));
   execFileSync('npm', ['install', '--offline', '--ignore-scripts', '--no-audit', '--no-fund', ...packed], { cwd: project, env, stdio: 'inherit' });
-  const version = artifacts.find(a => a.name === '@twotwobread/learning-wiki').version;
+  const version = artifacts.find(a => a.name === '@suyoung9137/learning-wiki').version;
   const output = execFileSync('npx', ['--offline', '--no-install', 'learning-wiki', '--version'], { cwd: project, env, encoding: 'utf8' });
   assert.ok(output.includes(version), `Expected version ${version}`);
   const launcher = join(project, 'node_modules/.bin/learning-wiki');
