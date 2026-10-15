@@ -52,4 +52,6 @@ Google Drive 등 동기화 제품은 의존성이 아닙니다. 설치 여부, �
 
 [구현 순서 및 완료 기준](docs/implementation-plan.md)을 참고하세요.
 
-패키지 scope, Go module 경로, 원격 저장소 URL은 아직 정하지 않았습니다.
+개발 환경은 mise로 관리합니다. [개발 환경 설정](docs/development.md)을 참고하세요.
+
+Go module은 `github.com/twotwobread/learning-wiki`입니다. npm 패키지 scope는 아직 정하지 않았습니다.
