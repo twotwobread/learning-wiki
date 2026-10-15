@@ -18,6 +18,7 @@ for (const name of ['learning-wiki', 'learning-wiki-linux-x64']) {
   await mkdir(join(target, 'bin'), { recursive: true });
   await copyFile(join(root, 'npm', name, 'package.json'), join(target, 'package.json'));
   await copyFile(join(root, 'docs/npm.md'), join(target, 'README.md'));
+  await copyFile(join(root, 'LICENSE'), join(target, 'LICENSE'));
 }
 const launcher = join(dist, 'npm/learning-wiki/bin/learning-wiki.cjs');
 await copyFile(join(root, 'npm/learning-wiki/bin/learning-wiki.cjs'), launcher);

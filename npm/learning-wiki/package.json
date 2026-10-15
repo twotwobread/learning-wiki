@@ -2,10 +2,11 @@
   "name": "@suyoung9137/learning-wiki",
   "version": "0.1.0",
   "description": "Connect WSL learning sessions to a local Obsidian vault",
-  "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "repository": { "type": "git", "url": "git+https://github.com/twotwobread/learning-wiki.git", "directory": "npm/learning-wiki" },
   "bin": { "learning-wiki": "bin/learning-wiki.cjs" },
-  "files": ["bin/", "README.md"],
+  "files": ["bin/", "README.md", "LICENSE"],
   "engines": { "node": ">=22" },
   "optionalDependencies": { "@suyoung9137/learning-wiki-linux-x64": "0.1.0" }
 }

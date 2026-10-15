@@ -2,9 +2,10 @@
   "name": "@suyoung9137/learning-wiki-linux-x64",
   "version": "0.1.0",
   "description": "Linux x64 binary for learning-wiki",
-  "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
+  "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
+  "repository": { "type": "git", "url": "git+https://github.com/twotwobread/learning-wiki.git", "directory": "npm/learning-wiki-linux-x64" },
   "os": ["linux"],
   "cpu": ["x64"],
-  "files": ["bin/", "THIRD-PARTY-NOTICES.md", "README.md"]
+  "files": ["bin/", "THIRD-PARTY-NOTICES.md", "README.md", "LICENSE"]
 }
