@@ -10,8 +10,10 @@ import (
 	"testing"
 )
 
-func TestInitRequiresPath(t *testing.T) {
+func TestNonInteractiveInitRequiresPath(t *testing.T) {
 	cmd := NewRootCommand("dev")
+	cmd.SetIn(&bytes.Buffer{})
+	cmd.SetOut(&bytes.Buffer{})
 	cmd.SetArgs([]string{"init"})
 	if err := cmd.Execute(); !errors.Is(err, ErrInvalidArguments) {
 		t.Fatalf("expected input error: %v", err)

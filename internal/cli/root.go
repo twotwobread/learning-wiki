@@ -41,7 +41,7 @@ func NewRootCommand(version string) *cobra.Command {
 	return cmd
 }
 
-// Run routes output and returns 0 on success, 2 for invalid input, or 1 for other errors.
+// Run returns 0 on success, 2 for invalid input, 130 for cancellation, or 1 otherwise.
 // Only the executable entry point may call os.Exit.
 func Run(args []string, version string, stdout, stderr io.Writer) int {
 	cmd := NewRootCommand(version)
@@ -51,6 +51,9 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 	cmd.SetErr(stderr)
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(stderr, err)
+		if errors.Is(err, ErrCancelled) {
+			return 130
+		}
 		if errors.Is(err, ErrInvalidArguments) || errors.Is(err, vault.ErrInvalidPath) {
 			return 2
 		}

@@ -57,7 +57,11 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - `--help`, `-h`: 도움말 출력
 - `--version`, `-v`: 버전 출력 (기본 `dev`)
 - 잘못된 명령·옵션: 오류를 stderr로 출력, 종료 코드 `2`
-- 성공: 종료 코드 `0`, 그 외 실행 오류: `1`
+- 성공: 종료 코드 `0`, 마법사 취소: `130`, 그 외 실행 오류: `1`
+- 터미널에서 `init` 단독 실행: Huh 기반 대화형 마법사 (경로 입력 → 필요 시 생성 동의 → 최종 확인)
+- 최종 확인 전 Vault·설정 쓰기 없음. 확인 기본값은 취소
+- stdin 또는 stdout이 터미널이 아니면 인자 없는 `init`은 종료 코드 `2`; `--vault` 사용 안내
+- `--vault` 지정 시 기존 비대화형 흐름 유지. `--create` 단독 사용·빈 `--vault`는 입력 오류
 - `init --vault <절대 경로>`: 기존 로컬 Vault 연결 및 `sessions/`, `templates/` 준비
 - `--create`: 없는 Vault 및 부모 디렉터리 생성 허용
 - Windows 드라이브 절대 경로는 `wslpath -u`로 변환. WSL 절대 경로도 지원
@@ -65,9 +69,12 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - 관리 하위 디렉터리의 심볼릭 링크는 거부. 동시 외부 변경에 대한 보안 격리 보장은 아님
 - 기기별 설정: `$XDG_CONFIG_HOME/learning-wiki/config.json` (미설정 시 `~/.config/learning-wiki/config.json`)
 - 같은 Vault 재연결 허용. 다른 Vault로의 설정 덮어쓰기 및 손상된 설정 교체는 거부
-- 마법사·스킬·템플릿 파일·Obsidian 플러그인 설치는 아직 미구현
+- 스킬·템플릿 파일·Obsidian 플러그인 설치는 아직 미구현
 
 ```bash
+# 대화형 초기 설정 (터미널 필요)
+mise exec -- go run ./cmd/learning-wiki init
+
 # 기존 Windows 폴더 연결: Bash에서는 작은따옴표로 역슬래시 보존
 mise exec -- go run ./cmd/learning-wiki init --vault 'D:\Notes\LearningWiki'
 # 없는 폴더 생성 허용
@@ -103,4 +110,4 @@ CGO_ENABLED=1 mise exec -- go test -race ./...
 
 ## 다음 작업
 
-대화형 설치 마법사, 스킬·템플릿 설치, 실제 Windows Vault에서의 통합 검증 추가. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용; 실제 사용자 Vault·Obsidian 동작은 미검증.
+스킬·템플릿 설치 및 실제 Windows Vault에서의 통합 검증 추가. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용. 마법사는 PTY에서 경로 입력·생성 동의·최종 확인·완료 및 Ctrl+C 취소(130) 검증. 실제 사용자 Vault·Windows 터미널 렌더링·Obsidian 동작은 미검증.
