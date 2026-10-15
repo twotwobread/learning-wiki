@@ -21,6 +21,7 @@ type scriptedPrompt struct {
 
 func (p *scriptedPrompt) Path(context.Context) (string, error)     { return p.path, p.err }
 func (p *scriptedPrompt) Agents(context.Context) ([]string, error) { return p.agents, p.err }
+func (p *scriptedPrompt) Plugin(context.Context) (bool, error)     { return false, p.err }
 func (p *scriptedPrompt) Confirm(context.Context, string, string) (bool, error) {
 	p.confirmations++
 	if p.err != nil {

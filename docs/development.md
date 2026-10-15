@@ -58,7 +58,7 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - `--version`, `-v`: 버전 출력 (기본 `dev`)
 - 잘못된 명령·옵션: 오류를 stderr로 출력, 종료 코드 `2`
 - 성공: 종료 코드 `0`, 마법사 취소: `130`, 그 외 실행 오류: `1`
-- 터미널에서 `init` 단독 실행: Huh 기반 대화형 마법사 (경로 입력 → 필요 시 생성 동의 → 에이전트 선택 → 최종 확인)
+- 터미널에서 `init` 단독 실행: Huh 기반 대화형 마법사 (경로 입력 → 필요 시 생성 동의 → 에이전트 선택 → 플러그인 설치 동의 → 최종 확인)
 - 최종 확인 전 Vault·설정 쓰기 없음. 확인 기본값은 취소
 - stdin 또는 stdout이 터미널이 아니면 인자 없는 `init`은 종료 코드 `2`; `--vault` 사용 안내
 - `--vault` 지정 시 기존 비대화형 흐름 유지. `--create` 단독 사용·빈 `--vault`는 입력 오류
@@ -72,7 +72,8 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - 학습 노트 템플릿은 기본 설치. `--agents pi,codex`로 공통 수집 스킬 설치
 - pi/Codex 공유 경로 `~/.agents/skills/` 사용. 미선택 에이전트에서도 보일 수 있음
 - 스킬 보조 스크립트 실행에 Node.js 필요. 상세: [학습 노트 수집](capture.md)
-- Obsidian 플러그인 설치는 아직 미구현
+- `--plugin`: 고정 버전 플러그인 파일 다운로드·설치 동의. 생략 시 건너뛰기
+- 기존 플러그인·인증·활성화 설정 보존. 상세: [Obsidian 연결](obsidian.md)
 
 ```bash
 # 대화형 초기 설정 (터미널 필요)
@@ -114,4 +115,4 @@ CGO_ENABLED=1 mise exec -- go test -race ./...
 
 ## 다음 작업
 
-실제 pi/Codex에서 스킬 발견·노트 품질 및 Windows Vault 연동 검증 후 Obsidian 플러그인 설치 지원 추가. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용. 마법사는 PTY에서 경로 입력·생성 동의·에이전트 선택·최종 확인·완료 검증. Ctrl+C 취소(130)는 이전 단계에서 검증. 실제 에이전트 세션·Windows 터미널 렌더링·Obsidian 동작은 미검증.
+얇은 npm 래퍼·Linux x64 바이너리 패키징 및 깨끗한 WSL 환경 설치 검증. 원본 학습 자료 품질에 집중하며 플러그인 생성 결과 튜닝은 범위 밖. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용. 마법사는 PTY에서 경로 입력·생성 동의·에이전트 선택·최종 확인·완료 검증. Ctrl+C 취소(130)는 이전 단계에서 검증. 실제 pi 스킬 수집과 사용자의 수동 설치 플러그인 ingest 결과는 확인. Codex 세션 수집, 자동 설치한 플러그인의 Windows 활성화, 새 마법사의 Windows 터미널 렌더링은 별도 검증 필요.

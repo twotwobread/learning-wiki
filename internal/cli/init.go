@@ -6,16 +6,20 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/twotwobread/learning-wiki/internal/config"
+	"github.com/twotwobread/learning-wiki/internal/obsidian"
 	"github.com/twotwobread/learning-wiki/internal/resources"
 	"github.com/twotwobread/learning-wiki/internal/vault"
 )
 
-func newInitCommand() *cobra.Command {
+func newInitCommand() *cobra.Command { return newInitCommandWithFetcher(nil) }
+
+func newInitCommandWithFetcher(fetch obsidian.Fetcher) *cobra.Command {
+	var plugin bool
 	var path string
 	var create bool
 	var agents []string
 	cmd := &cobra.Command{
-		Use:   "init [--vault <absolute-path>] [--create] [--agents pi,codex]",
+		Use:   "init [--vault <absolute-path>] [--create] [--agents pi,codex] [--plugin]",
 		Short: "Connect a local vault and install learning resources",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
@@ -24,8 +28,8 @@ func newInitCommand() *cobra.Command {
 			if err := resources.ValidateAgents(agents); err != nil {
 				return fmt.Errorf("%w: %w", ErrInvalidArguments, err)
 			}
-			if path == "" && (cmd.Flags().Changed("vault") || cmd.Flags().Changed("create") || cmd.Flags().Changed("agents")) {
-				return fmt.Errorf("%w: --vault requires a non-empty value; --create/--agents require --vault", ErrInvalidArguments)
+			if path == "" && (cmd.Flags().Changed("vault") || cmd.Flags().Changed("create") || cmd.Flags().Changed("agents") || cmd.Flags().Changed("plugin")) {
+				return fmt.Errorf("%w: --vault requires a non-empty value; --create/--agents/--plugin require --vault", ErrInvalidArguments)
 			}
 			if path == "" && (!isTerminal(cmd.InOrStdin()) || !isTerminal(cmd.OutOrStdout())) {
 				return fmt.Errorf("%w: interactive setup requires a terminal; provide --vault <absolute-path> [--create] [--agents pi,codex]", ErrInvalidArguments)
@@ -43,7 +47,7 @@ func newInitCommand() *cobra.Command {
 				if err != nil {
 					return err
 				}
-				resolved, create, agents = plan.Path, plan.Create, plan.Agents
+				resolved, create, agents, plugin = plan.Path, plan.Create, plan.Agents, plan.Plugin
 			} else {
 				resolved, err = vault.Resolve(cmd.Context(), path, nil)
 				if err != nil {
@@ -64,6 +68,17 @@ func newInitCommand() *cobra.Command {
 			if err = resources.Check(files); err != nil {
 				return err
 			}
+			var pluginResult obsidian.Result
+			if plugin {
+				if _, err = fmt.Fprintf(cmd.OutOrStdout(), "Plugin request: %s %s (Apache-2.0), Obsidian >= %s required. Existing installations are preserved.\n", obsidian.Repository, obsidian.Version, obsidian.MinAppVersion); err != nil {
+					return err
+				}
+				pluginResult, err = obsidian.Prepare(cmd.Context(), resolved, obsidian.PinnedRelease(), fetch)
+				if err != nil {
+					return err
+				}
+				files = append(files, pluginResult.Files...)
+			}
 			if err = vault.Prepare(resolved, create); err != nil {
 				return fmt.Errorf("prepare vault: %w", err)
 			}
@@ -81,12 +96,23 @@ func newInitCommand() *cobra.Command {
 					return err
 				}
 			}
-			_, err = fmt.Fprintln(cmd.OutOrStdout(), "Open this folder in Windows Obsidian. Obsidian plugin installation is not implemented yet.")
+			if plugin {
+				if pluginResult.Existing {
+					_, err = fmt.Fprintf(cmd.OutOrStdout(), "Existing plugin %s preserved; no upgrade or provenance check performed.\n", pluginResult.Version)
+				} else {
+					_, err = fmt.Fprintf(cmd.OutOrStdout(), "Plugin %s files installed with SHA-256 verification.\n", pluginResult.Version)
+				}
+				if err != nil {
+					return err
+				}
+			}
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), "Open this folder in Windows Obsidian. If installing plugin files, close/reopen Obsidian, review community-plugin trust, enable Karpathy LLM Wiki, then configure your provider there. No credentials or activation settings were changed.")
 			return err
 		},
 	}
 	cmd.Flags().StringVar(&path, "vault", "", "Windows drive or WSL absolute path to the local vault")
 	cmd.Flags().BoolVar(&create, "create", false, "Allow creation of a missing vault directory")
 	cmd.Flags().StringSliceVar(&agents, "agents", nil, "Install shared capture skill for pi,codex (visible to both); omit to install template only")
+	cmd.Flags().BoolVar(&plugin, "plugin", false, "Consent to download Karpathy LLM Wiki 1.28.0 from GitHub (Apache-2.0); requires Obsidian >= 1.11.4; preserve existing installs")
 	return cmd
 }
