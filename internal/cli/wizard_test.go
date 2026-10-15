@@ -16,9 +16,11 @@ type scriptedPrompt struct {
 	answers       []bool
 	err           error
 	confirmations int
+	agents        []string
 }
 
-func (p *scriptedPrompt) Path(context.Context) (string, error) { return p.path, p.err }
+func (p *scriptedPrompt) Path(context.Context) (string, error)     { return p.path, p.err }
+func (p *scriptedPrompt) Agents(context.Context) ([]string, error) { return p.agents, p.err }
 func (p *scriptedPrompt) Confirm(context.Context, string, string) (bool, error) {
 	p.confirmations++
 	if p.err != nil {
@@ -46,10 +48,13 @@ func TestWizardPlansWithoutWriting(t *testing.T) {
 			if !exists {
 				answers = []bool{true, true}
 			}
-			p := &scriptedPrompt{path: root, answers: answers}
+			p := &scriptedPrompt{path: root, answers: answers, agents: []string{"pi", "codex"}}
 			plan, err := planWizard(context.Background(), p, configPath)
 			if err != nil {
 				t.Fatal(err)
+			}
+			if len(plan.Agents) != 2 || plan.Agents[0] != "pi" || plan.Agents[1] != "codex" {
+				t.Fatalf("agent selection lost: %v", plan.Agents)
 			}
 			if plan.Path != root || plan.Create == exists {
 				t.Fatalf("unexpected plan: %+v", plan)

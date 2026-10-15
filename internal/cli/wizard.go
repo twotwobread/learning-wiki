@@ -11,6 +11,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/twotwobread/learning-wiki/internal/config"
+	"github.com/twotwobread/learning-wiki/internal/resources"
 	"github.com/twotwobread/learning-wiki/internal/vault"
 	"golang.org/x/term"
 )
@@ -20,9 +21,11 @@ var ErrCancelled = errors.New("setup cancelled")
 type setupPlan struct {
 	Path   string
 	Create bool
+	Agents []string
 }
 type setupPrompt interface {
 	Path(context.Context) (string, error)
+	Agents(context.Context) ([]string, error)
 	Confirm(context.Context, string, string) (bool, error)
 }
 
@@ -55,7 +58,14 @@ func planWizard(ctx context.Context, p setupPrompt, configPath string) (setupPla
 	} else if !info.IsDir() {
 		return setupPlan{}, fmt.Errorf("%w: %s", vault.ErrNotDirectory, resolved)
 	}
-	approved, err := p.Confirm(ctx, "이 설정으로 초기화할까요?", fmt.Sprintf("Vault: %s\n설정: %s\nsessions/ · templates/ 준비 및 로컬 설정 저장\n기존 파일 보존. 스킬·플러그인 설치는 아직 미지원.", resolved, configPath))
+	plan.Agents, err = p.Agents(ctx)
+	if err != nil {
+		return setupPlan{}, err
+	}
+	if err = resources.ValidateAgents(plan.Agents); err != nil {
+		return setupPlan{}, err
+	}
+	approved, err := p.Confirm(ctx, "이 설정으로 초기화할까요?", fmt.Sprintf("Vault: %s\n설정: %s\n에이전트: %v\n학습 템플릿 설치 및 로컬 설정 저장\n선택 시 ~/.agents/skills/에 공통 스킬 설치 (pi·Codex 모두 탐색 가능)\n기존 파일 보존. Obsidian 플러그인 설치는 아직 미지원.", resolved, configPath, plan.Agents))
 	if err != nil {
 		return setupPlan{}, err
 	}
@@ -87,6 +97,12 @@ func (p huhPrompt) Path(ctx context.Context) (string, error) {
 	}))
 	return value, err
 }
+func (p huhPrompt) Agents(ctx context.Context) ([]string, error) {
+	var agents []string
+	err := p.run(ctx, huh.NewMultiSelect[string]().Title("수집 스킬을 사용할 에이전트").Description("공유 경로 ~/.agents/skills/ 사용. 하나만 선택해도 다른 에이전트에서 보일 수 있음. 미선택 시 템플릿만 설치.").Options(huh.NewOption("pi", "pi"), huh.NewOption("Codex", "codex")).Value(&agents))
+	return agents, err
+}
+
 func (p huhPrompt) Confirm(ctx context.Context, title, description string) (bool, error) {
 	approved := false
 	err := p.run(ctx, huh.NewConfirm().Title(title).Description(description).Affirmative("진행").Negative("취소").Value(&approved))
