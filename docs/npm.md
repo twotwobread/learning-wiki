@@ -86,10 +86,12 @@ npx --offline --no-install learning-wiki init
 배포 명령 (npm 로그인 및 필요 시 웹/OTP 인증):
 
 ```bash
-npm publish dist/suyoung9137-learning-wiki-linux-x64-0.1.0.tgz --access public
-npm publish dist/suyoung9137-learning-wiki-0.1.0.tgz --access public
+npm publish ./dist/suyoung9137-learning-wiki-linux-x64-0.1.0.tgz --access public
+npm publish ./dist/suyoung9137-learning-wiki-0.1.0.tgz --access public
 ```
 
-인증정보·OTP를 저장소나 채팅에 기록하지 않기. 같은 버전은 재배포 불가하므로 검증한 tarball만 사용.
+로컬 tarball 경로는 `./dist/...` 또는 절대 경로로 지정 (일부 npm 버전에서 `dist/...`를 GitHub 경로로 해석 가능).
+
+로그인 성공이 배포 권한 충족을 의미하지는 않음. npm이 2FA를 요구하면 계정 보안 설정을 완료하고 사용자 터미널에서 인증 진행. 인증정보·OTP를 저장소나 채팅에 기록하지 않기. 같은 버전은 재배포 불가하므로 검증한 tarball만 사용.
 
 기존 설치 프로그램의 사용자 권한, 경로·파일 보존, 플러그인 동의 정책은 npm 래퍼에서도 동일하게 적용.
