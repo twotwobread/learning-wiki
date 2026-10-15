@@ -1,12 +1,23 @@
-# npm 배포 준비 (Linux x64 / WSL)
+# npm 패키지 (Linux x64 / WSL)
 
 ## 상태
 
-- 패키지명은 잠정적으로 `@twotwobread/learning-wiki`, `@twotwobread/learning-wiki-linux-x64` 사용
-- 실제 npm 계정·scope 권한 미확인, 레지스트리 미배포
-- 우발적 배포 방지를 위해 두 패키지 모두 `private: true`
-- 자체 코드의 배포 라이선스 결정 전까지 `UNLICENSED`. 공개 배포 전 권한·라이선스·private 설정 검토 필요
-- 지금은 로컬 tarball로 설치·실행 가능. `npx @twotwobread/learning-wiki`의 레지스트리 설치는 아직 사용 불가
+- 사용자 계정명에 맞춰 `@suyoung9137/learning-wiki`, `@suyoung9137/learning-wiki-linux-x64` 사용
+- npm 계정: `suyoung9137`
+- 자체 코드: MIT 라이선스. 번들 의존성은 해당 라이선스와 고지 적용
+- 공개 npm 배포 대상으로 구성. 개발용 루트 package.json만 `private: true` 유지
+- 레지스트리 제공 버전 확인: `npm view @suyoung9137/learning-wiki version`
+
+## 레지스트리 설치
+
+배포된 버전은 WSL에서 다음과 같이 실행:
+
+```bash
+npx @suyoung9137/learning-wiki@0.1.0 --version
+npx @suyoung9137/learning-wiki@0.1.0 init
+```
+
+Node.js 22 이상 필요. Go·mise·저장소 clone은 최종 사용자에게 불필요.
 
 ## 구조
 
@@ -47,13 +58,13 @@ mise exec -- npm run test:package
 
 ```bash
 npm install --offline --ignore-scripts --no-audit --no-fund \
-  /absolute/path/to/dist/twotwobread-learning-wiki-linux-x64-0.1.0.tgz \
-  /absolute/path/to/dist/twotwobread-learning-wiki-0.1.0.tgz
+  /absolute/path/to/dist/suyoung9137-learning-wiki-linux-x64-0.1.0.tgz \
+  /absolute/path/to/dist/suyoung9137-learning-wiki-0.1.0.tgz
 npx --offline --no-install learning-wiki --version
 npx --offline --no-install learning-wiki init
 ```
 
-설치 시에는 두 로컬 tarball을 함께 지정. 아직 레지스트리에 없으므로 메인 tarball만으로 플랫폼 패키지 다운로드 불가.
+오프라인 로컬 검증에는 두 tarball을 함께 지정. 레지스트리 배포 후 일반 설치에서는 npm이 동일 버전 플랫폼 패키지를 선택.
 
 ## 검증 범위
 
@@ -67,9 +78,18 @@ npx --offline --no-install learning-wiki init
 
 1. npm 계정·scope 소유권 및 패키지명 확정
 2. 자체 코드 라이선스 결정, 바이너리 의존성 고지 검토
-3. private 보호 해제 여부 승인
+3. 공개 배포 승인 확인
 4. CI에서 Go/Node 테스트·빌드·패키징 검증
 5. 실제 다른 WSL 환경에서 검증
 6. 명시적 배포 승인 후 플랫폼 패키지 먼저, 메인 패키지 다음 순서로 동일 버전 배포
+
+배포 명령 (npm 로그인 및 필요 시 웹/OTP 인증):
+
+```bash
+npm publish dist/suyoung9137-learning-wiki-linux-x64-0.1.0.tgz --access public
+npm publish dist/suyoung9137-learning-wiki-0.1.0.tgz --access public
+```
+
+인증정보·OTP를 저장소나 채팅에 기록하지 않기. 같은 버전은 재배포 불가하므로 검증한 tarball만 사용.
 
 기존 설치 프로그램의 사용자 권한, 경로·파일 보존, 플러그인 동의 정책은 npm 래퍼에서도 동일하게 적용.

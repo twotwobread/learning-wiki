@@ -42,7 +42,7 @@ mise exec -- npm --version
 github.com/twotwobread/learning-wiki
 ```
 
-CLI 명령 처리는 Cobra 사용. 의존성 버전·해시는 `go.mod`와 `go.sum`으로 관리. npm scope는 `@twotwobread` 잠정 사용 (권한 미확인, 레지스트리 미배포).
+CLI 명령 처리는 Cobra 사용. 의존성 버전·해시는 `go.mod`와 `go.sum`으로 관리. npm scope는 `@suyoung9137` 사용. 자체 코드 MIT 라이선스, 공개 배포 설정. 레지스트리 제공 여부는 `npm view`로 확인.
 
 ## CLI 실행·빌드
 
@@ -117,4 +117,4 @@ CGO_ENABLED=1 mise exec -- go test -race ./...
 
 ## 다음 작업
 
-npm 계정·scope·라이선스 확정 및 별도 WSL 환경 설치 검증. 로컬 tarball 설치·npx 실행 검증은 완료; CI 워크플로 추가. 실제 레지스트리 배포는 별도 승인 필요. 원본 학습 자료 품질에 집중하며 플러그인 생성 결과 튜닝은 범위 밖. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용. 마법사는 PTY에서 경로 입력·생성 동의·에이전트 선택·최종 확인·완료 검증. Ctrl+C 취소(130)는 이전 단계에서 검증. 실제 pi 스킬 수집과 사용자의 수동 설치 플러그인 ingest 결과는 확인. Codex 세션 수집, 자동 설치한 플러그인의 Windows 활성화, 새 마법사의 Windows 터미널 렌더링은 별도 검증 필요.
+별도 WSL 환경 설치 검증 및 source 품질 개선. 로컬 tarball 설치·npx 실행과 CI 테스트·패키징 검증 완료. npm 공개 배포 승인 및 MIT 라이선스 적용. 원본 학습 자료 품질에 집중하며 플러그인 생성 결과 튜닝은 범위 밖. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용. 마법사는 PTY에서 경로 입력·생성 동의·에이전트 선택·최종 확인·완료 검증. Ctrl+C 취소(130)는 이전 단계에서 검증. 실제 pi 스킬 수집과 사용자의 수동 설치 플러그인 ingest 결과는 확인. Codex 세션 수집, 자동 설치한 플러그인의 Windows 활성화, 새 마법사의 Windows 터미널 렌더링은 별도 검증 필요.
