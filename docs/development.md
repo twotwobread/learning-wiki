@@ -42,7 +42,38 @@ mise exec -- npm --version
 github.com/twotwobread/learning-wiki
 ```
 
-현재 외부 Go 의존성이 없어 `go.sum`은 없습니다. npm scope는 아직 정하지 않았습니다.
+CLI 명령 처리는 Cobra 사용. 의존성 버전·해시는 `go.mod`와 `go.sum`으로 관리. npm scope는 미정.
+
+## CLI 실행·빌드
+
+```bash
+mise exec -- go run ./cmd/learning-wiki --help
+mise exec -- go run ./cmd/learning-wiki --version
+mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
+./bin/learning-wiki --help
+```
+
+- 인자 없음: 도움말 출력
+- `--help`, `-h`: 도움말 출력
+- `--version`, `-v`: 버전 출력 (기본 `dev`)
+- 잘못된 명령·옵션: 오류를 stderr로 출력, 종료 코드 `2`
+- 성공: 종료 코드 `0`, 그 외 실행 오류: `1`
+- `init` 등 설치 명령은 아직 미구현
+
+빌드 버전 주입:
+
+```bash
+mise exec -- go build -ldflags '-X main.version=0.1.0' -o bin/learning-wiki ./cmd/learning-wiki
+```
+
+검증:
+
+```bash
+mise exec -- go test ./...
+mise exec -- go vet ./...
+# C 컴파일러 및 CGO 활성화 필요
+CGO_ENABLED=1 mise exec -- go test -race ./...
+```
 
 ## 현재 환경 검증
 
@@ -51,7 +82,8 @@ github.com/twotwobread/learning-wiki
 - mise 환경에서 임시 Go 프로그램 컴파일·실행 성공.
 - Bash 활성화 후 `mise doctor` 정상 확인.
 - 기존 수동 설치 Go와 해당 링크만 제거, pi용 Node는 보존.
-- 애플리케이션 소스와 테스트는 아직 없으므로 프로젝트 빌드·테스트는 다음 단계에서 추가.
+- CLI 테스트·`go vet`·Linux 바이너리 빌드 및 종료 코드 검증 통과.
+- 현재 환경에 C 컴파일러가 없어 race 검사는 미실행. 일반 테스트 통과와 구분.
 
 ## 다음 작업
 

@@ -2,7 +2,7 @@
 
 WSL의 pi/Codex에서 얻은 학습 내용을 Windows Obsidian Vault에 저장하기 위한 설치 패키지.
 
-> 상태: 설계 및 초기 저장소 구성 단계. 아직 실행 가능한 CLI나 배포된 npm 패키지는 없습니다.
+> 상태: Cobra 기반 최소 CLI 구현 완료 (`--help`, `--version`). 설치 기능과 npm 배포는 아직 미구현.
 
 ## 목표 흐름
 
