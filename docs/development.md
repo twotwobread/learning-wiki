@@ -58,7 +58,23 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - `--version`, `-v`: 버전 출력 (기본 `dev`)
 - 잘못된 명령·옵션: 오류를 stderr로 출력, 종료 코드 `2`
 - 성공: 종료 코드 `0`, 그 외 실행 오류: `1`
-- `init` 등 설치 명령은 아직 미구현
+- `init --vault <절대 경로>`: 기존 로컬 Vault 연결 및 `sessions/`, `templates/` 준비
+- `--create`: 없는 Vault 및 부모 디렉터리 생성 허용
+- Windows 드라이브 절대 경로는 `wslpath -u`로 변환. WSL 절대 경로도 지원
+- 상대 경로·UNC 경로 미지원. Linux 경로가 실제 Windows 마운트인지는 아직 강제하지 않음
+- 관리 하위 디렉터리의 심볼릭 링크는 거부. 동시 외부 변경에 대한 보안 격리 보장은 아님
+- 기기별 설정: `$XDG_CONFIG_HOME/learning-wiki/config.json` (미설정 시 `~/.config/learning-wiki/config.json`)
+- 같은 Vault 재연결 허용. 다른 Vault로의 설정 덮어쓰기 및 손상된 설정 교체는 거부
+- 마법사·스킬·템플릿 파일·Obsidian 플러그인 설치는 아직 미구현
+
+```bash
+# 기존 Windows 폴더 연결: Bash에서는 작은따옴표로 역슬래시 보존
+mise exec -- go run ./cmd/learning-wiki init --vault 'D:\Notes\LearningWiki'
+# 없는 폴더 생성 허용
+mise exec -- go run ./cmd/learning-wiki init --vault /mnt/d/Notes/LearningWiki --create
+```
+
+검사 실패 시 새로 생성한 빈 Vault 디렉터리는 정리. 기존 데이터는 보존. Vault 준비 이후 설정 저장에 실패하면 준비된 디렉터리는 유지하고 오류 반환; 재실행 가능. 설정 저장은 WSL 로컬 파일 시스템의 hard link 기반 no-replace 방식 사용. 동시 초기 설정 실행은 지원 대상으로 보장하지 않음.
 
 빌드 버전 주입:
 
@@ -87,4 +103,4 @@ CGO_ENABLED=1 mise exec -- go test -race ./...
 
 ## 다음 작업
 
-환경 감지, 경로 변환 및 접근 검사를 외부 명령과 파일 시스템으로부터 테스트 가능한 형태로 분리하여 구현합니다. 이후 `init` 명령과 설치 마법사를 연결합니다.
+대화형 설치 마법사, 스킬·템플릿 설치, 실제 Windows Vault에서의 통합 검증 추가. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용; 실제 사용자 Vault·Obsidian 동작은 미검증.

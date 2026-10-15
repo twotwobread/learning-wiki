@@ -7,6 +7,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
+	"github.com/twotwobread/learning-wiki/internal/vault"
 )
 
 // ErrInvalidArguments identifies invalid command-line input independently of wording.
@@ -20,7 +21,7 @@ func NewRootCommand(version string) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:           "learning-wiki",
 		Short:         "Collect learning from pi and Codex into a local Obsidian vault",
-		Long:          "Learning Wiki connects WSL-based pi and Codex workflows to a local Obsidian vault. Setup commands are not yet available.",
+		Long:          "Learning Wiki connects WSL-based pi and Codex workflows to a local Obsidian vault. Use init to connect a local vault.",
 		Version:       version,
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -35,6 +36,8 @@ func NewRootCommand(version string) *cobra.Command {
 	cmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
 		return fmt.Errorf("%w: %w", ErrInvalidArguments, err)
 	})
+	cmd.AddCommand(newInitCommand())
+	cmd.CompletionOptions.DisableDefaultCmd = true
 	return cmd
 }
 
@@ -48,7 +51,7 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 	cmd.SetErr(stderr)
 	if err := cmd.Execute(); err != nil {
 		fmt.Fprintln(stderr, err)
-		if errors.Is(err, ErrInvalidArguments) {
+		if errors.Is(err, ErrInvalidArguments) || errors.Is(err, vault.ErrInvalidPath) {
 			return 2
 		}
 		return 1

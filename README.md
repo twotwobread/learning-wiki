@@ -2,7 +2,7 @@
 
 WSL의 pi/Codex에서 얻은 학습 내용을 Windows Obsidian Vault에 저장하기 위한 설치 패키지.
 
-> 상태: Cobra 기반 최소 CLI 구현 완료 (`--help`, `--version`). 설치 기능과 npm 배포는 아직 미구현.
+> 상태: Cobra CLI (`--help`, `--version`, `init --vault`) 및 로컬 Vault 준비·기기별 설정 저장 구현. 대화형 마법사·스킬·플러그인 설치·npm 배포는 아직 미구현.
 
 ## 목표 흐름
 
