@@ -1,0 +1,11 @@
+{
+  "name": "@twotwobread/learning-wiki",
+  "version": "0.1.0",
+  "description": "Connect WSL learning sessions to a local Obsidian vault",
+  "private": true,
+  "license": "UNLICENSED",
+  "bin": { "learning-wiki": "bin/learning-wiki.cjs" },
+  "files": ["bin/", "README.md"],
+  "engines": { "node": ">=22" },
+  "optionalDependencies": { "@twotwobread/learning-wiki-linux-x64": "0.1.0" }
+}

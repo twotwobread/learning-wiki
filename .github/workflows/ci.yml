@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned toolchains
+        uses: jdx/mise-action@v3
+      - name: Go tests and checks
+        run: |
+          go test ./...
+          CGO_ENABLED=1 go test -race ./...
+          go vet ./...
+      - name: Node tests
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm test
+      - name: Build and validate local npm packages
+        run: |
+          npm run pack:local
+          npm run test:package
+      - name: Upload local package artifacts (no publishing)
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-wiki-linux-x64
+          path: |
+            dist/*.tgz
+            dist/artifacts.json
+          retention-days: 7

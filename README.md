@@ -2,9 +2,11 @@
 
 WSL의 pi/Codex에서 얻은 학습 내용을 Windows Obsidian Vault에 저장하기 위한 설치 패키지.
 
-> 상태: CLI·마법사, Vault 연결, 학습 자료 수집, 동의 기반 Obsidian 플러그인 파일 설치 구현. npm 배포는 아직 미구현.
+> 상태: CLI·마법사, Vault 연결, 학습 자료 수집, 플러그인 설치, npm 래퍼·로컬 패키징 구현. npm 레지스트리 미배포.
 
 수집 스킬 설치·사용 방법: [학습 노트 수집](docs/capture.md).
+
+로컬 npm 패키징·npx 검증: [npm 패키지](docs/npm.md). 현재 미배포이므로 레지스트리에서 패키지명만으로 설치 불가.
 
 ## 목표 흐름
 
@@ -65,4 +67,4 @@ Google Drive 등 동기화 제품은 의존성이 아닙니다. 설치 여부, �
 
 개발 환경은 mise로 관리합니다. [개발 환경 설정](docs/development.md)을 참고하세요.
 
-Go module은 `github.com/twotwobread/learning-wiki`입니다. npm 패키지 scope는 아직 정하지 않았습니다.
+Go module: `github.com/twotwobread/learning-wiki`. npm scope는 `@twotwobread`를 잠정 사용하며 소유권·배포 권한 확인 필요. 패키지는 공개 배포 승인 전까지 `private: true` 유지.
