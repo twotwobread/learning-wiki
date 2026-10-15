@@ -1,0 +1,19 @@
+# Build output
+/bin/
+/dist/
+/coverage/
+*.test
+coverage.out
+
+# Node dependencies and packaged artifacts
+node_modules/
+*.tgz
+
+# Local secrets and environment
+.env
+.env.*
+!.env.example
+
+# Local OS files
+.DS_Store
+Thumbs.db
