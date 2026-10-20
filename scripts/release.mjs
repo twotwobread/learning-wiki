@@ -70,6 +70,54 @@ export async function verifyArtifacts(dir, version) {
   }
 }
 
+// Entries come from verifyArtifacts, which enforces platform-first/main-last order.
+export async function publishArtifacts(entries, dir, { lookup, publish, wait }) {
+  const checkIntegrity = (entry, metadata) => {
+    if (metadata?.dist?.integrity !== entry.integrity) {
+      throw Object.assign(new Error(`Registry integrity differs for ${entry.name}@${entry.version}`), { code: 'ERR_RELEASE_INTEGRITY' });
+    }
+  };
+  for (const entry of entries) {
+    const existing = await lookup(entry);
+    if (existing !== null) {
+      checkIntegrity(entry, existing);
+      continue;
+    }
+    await publish(resolve(dir, entry.file), entry);
+    const started = Date.now();
+    let waited = 0;
+    for (;;) {
+      const metadata = await lookup(entry);
+      if (metadata !== null) {
+        checkIntegrity(entry, metadata);
+        break;
+      }
+      const remaining = 300000 - Math.max(waited, Date.now() - started);
+      if (remaining <= 0) {
+        throw Object.assign(new Error(`Registry visibility timed out for ${entry.name}@${entry.version}`), { code: 'ERR_RELEASE_VISIBILITY' });
+      }
+      const delay = Math.min(5000, remaining);
+      await wait(delay);
+      waited += delay;
+    }
+  }
+}
+
+async function publishRelease(dir, version) {
+  const entries = await verifyArtifacts(dir, version);
+  await publishArtifacts(entries, dir, {
+    lookup: async entry => {
+      const url = `https://registry.npmjs.org/${encodeURIComponent(entry.name)}/${encodeURIComponent(entry.version)}`;
+      const response = await fetch(url, { signal: AbortSignal.timeout(30000), cache: 'no-store' });
+      if (response.status === 404) return null;
+      if (!response.ok) throw Object.assign(new Error(`Registry lookup failed: HTTP ${response.status}`), { code: 'ERR_RELEASE_REGISTRY' });
+      return response.json();
+    },
+    publish: path => execFileSync('npm', ['publish', path, '--access', 'public', '--registry', 'https://registry.npmjs.org/'], { stdio: 'inherit' }),
+    wait: ms => new Promise(resolve => setTimeout(resolve, ms)),
+  });
+}
+
 async function preflight(tag) {
   const root = dirname(dirname(fileURLToPath(import.meta.url)));
   const readJSON = async path => JSON.parse(await readFile(join(root, path), 'utf8'));
@@ -92,11 +140,12 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const [command, tag, ...extra] = process.argv.slice(2);
     if (command === 'preflight' && tag && extra.length === 0) {
       await preflight(tag);
-    } else if (command === 'verify' && typeof tag === 'string' && /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(tag)?.[0] === tag && extra.length === 1) {
-      await verifyArtifacts(extra[0], tag.slice(1));
-      console.log(`Release artifacts verified for ${tag.slice(1)}`);
+    } else if ((command === 'verify' || command === 'publish') && typeof tag === 'string' && /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(tag)?.[0] === tag && extra.length === 1) {
+      if (command === 'publish') await publishRelease(extra[0], tag.slice(1));
+      else await verifyArtifacts(extra[0], tag.slice(1));
+      console.log(`Release artifacts ${command === 'publish' ? 'published' : 'verified'} for ${tag.slice(1)}`);
     } else {
-      throw new Error('Usage: node scripts/release.mjs preflight vX.Y.Z | verify vX.Y.Z dist');
+      throw new Error('Usage: node scripts/release.mjs preflight vX.Y.Z | verify vX.Y.Z dist | publish vX.Y.Z dist');
     }
   } catch (error) {
     console.error(error.message);
