@@ -2,7 +2,7 @@
 
 ## Goal and release boundary
 
-Publish the first `0.2.0` release manually from the three tarballs produced and tested by the successful `main` CI run for commit `be0997c13482eca8a313e653d34c6ee9165161be`. This establishes all three npm package names. Later releases start from a `vX.Y.Z` tag on `main`, require a GitHub Environment approval, and publish with npm Trusted Publishing (OIDC).
+Publish the first `0.2.0` release manually from the three tarballs produced and tested by the successful `main` CI run for the final release commit. This establishes all three npm package names. Later releases start from a `vX.Y.Z` tag on `main`, require a GitHub Environment approval, and publish with npm Trusted Publishing (OIDC).
 
 The public packages are `@suyoung9137/learning-wiki-linux-x64`, `@suyoung9137/learning-wiki-darwin-arm64`, and `@suyoung9137/learning-wiki`. The two platform packages must be available before the main package is published because the main package declares them as optional dependencies at the exact same version.
 

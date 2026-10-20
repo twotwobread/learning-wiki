@@ -8,15 +8,15 @@ pi/Codex에서 얻은 학습 내용을 로컬 Obsidian Vault에 저장하기 위
 
 설치·로컬 패키징·배포: [npm 패키지](docs/npm.md).
 
-현재 레지스트리 배포 버전 실행 (WSL Linux x64, Node.js 22 이상):
+`0.2.0` 실행 (WSL Linux x64 또는 macOS arm64, Node.js 22 이상):
 
 ```bash
-npx @suyoung9137/learning-wiki@0.1.0 init
+npx @suyoung9137/learning-wiki@0.2.0 init
 ```
 
 레지스트리 제공 여부: `npm view @suyoung9137/learning-wiki version`.
 
-이 브랜치의 `0.2.0`은 macOS arm64용 패키지도 생성합니다. 레지스트리에 배포되기 전에는 [로컬 tarball 검증](docs/npm.md)으로 실행할 수 있습니다.
+레지스트리 발행 전에는 [로컬 tarball 검증](docs/npm.md)으로 같은 버전을 실행할 수 있습니다.
 
 ## 목표 흐름
 
