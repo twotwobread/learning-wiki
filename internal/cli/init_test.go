@@ -112,3 +112,33 @@ func TestInitInvalidPathAndMissingPath(t *testing.T) {
 		t.Fatalf("missing path exit=%d", code)
 	}
 }
+
+func TestInitNoSkillRejectsExplicitAgentsWithoutSideEffects(t *testing.T) {
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, "config"))
+	root := filepath.Join(t.TempDir(), "vault")
+	configPath, err := config.Path()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out, errOut bytes.Buffer
+	if code := Run([]string{"init", "--vault", root, "--create", "--no-skill", "--agents", "codex"}, "dev", &out, &errOut); code != 2 {
+		t.Fatalf("invalid input exit=%d", code)
+	}
+	for _, path := range []string{root, configPath, filepath.Join(home, ".agents")} {
+		if _, err := os.Stat(path); !errors.Is(err, fs.ErrNotExist) {
+			t.Fatalf("created resource despite invalid arguments: %s %v", path, err)
+		}
+	}
+}
+
+func TestInitNoSkillRequiresVault(t *testing.T) {
+	cmd := NewRootCommand("dev")
+	cmd.SetIn(&bytes.Buffer{})
+	cmd.SetOut(&bytes.Buffer{})
+	cmd.SetArgs([]string{"init", "--no-skill"})
+	if err := cmd.Execute(); !errors.Is(err, ErrInvalidArguments) {
+		t.Fatalf("expected input error: %v", err)
+	}
+}

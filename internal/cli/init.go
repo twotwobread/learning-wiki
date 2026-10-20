@@ -18,21 +18,25 @@ func newInitCommandWithFetcher(fetch obsidian.Fetcher) *cobra.Command {
 
 func newInitCommandWithResolver(fetch obsidian.Fetcher, resolver hostpath.Resolver) *cobra.Command {
 	var plugin bool
+	var noSkill bool
 	var path string
 	var create bool
 	var agents []string
 	cmd := &cobra.Command{
-		Use:   "init [--vault <absolute-path>] [--create] [--agents pi,codex] [--plugin]",
+		Use:   "init [--vault <absolute-path>] [--create] [--agents pi,codex | --no-skill] [--plugin]",
 		Short: "Connect a local vault and install learning resources",
 		Args: func(cmd *cobra.Command, args []string) error {
 			if len(args) > 0 {
 				return fmt.Errorf("%w: init accepts no positional arguments", ErrInvalidArguments)
 			}
+			if noSkill && cmd.Flags().Changed("agents") {
+				return fmt.Errorf("%w: --no-skill cannot be combined with --agents", ErrInvalidArguments)
+			}
 			if err := resources.ValidateAgents(agents); err != nil {
 				return fmt.Errorf("%w: %w", ErrInvalidArguments, err)
 			}
-			if path == "" && (cmd.Flags().Changed("vault") || cmd.Flags().Changed("create") || cmd.Flags().Changed("agents") || cmd.Flags().Changed("plugin")) {
-				return fmt.Errorf("%w: --vault requires a non-empty value; --create/--agents/--plugin require --vault", ErrInvalidArguments)
+			if path == "" && (cmd.Flags().Changed("vault") || cmd.Flags().Changed("create") || cmd.Flags().Changed("agents") || cmd.Flags().Changed("plugin") || cmd.Flags().Changed("no-skill")) {
+				return fmt.Errorf("%w: --vault requires a non-empty value; --create/--agents/--no-skill/--plugin require --vault", ErrInvalidArguments)
 			}
 			if path == "" && (!isTerminal(cmd.InOrStdin()) || !isTerminal(cmd.OutOrStdout())) {
 				return fmt.Errorf("%w: interactive setup requires a terminal; provide --vault <absolute-path> [--create] [--agents pi,codex]", ErrInvalidArguments)
@@ -63,6 +67,9 @@ func newInitCommandWithResolver(fetch obsidian.Fetcher, resolver hostpath.Resolv
 			home, err := os.UserHomeDir()
 			if err != nil {
 				return err
+			}
+			if noSkill {
+				agents = nil
 			}
 			files, err := resources.Plan(home, resolved, configPath, agents)
 			if err != nil {
@@ -115,7 +122,8 @@ func newInitCommandWithResolver(fetch obsidian.Fetcher, resolver hostpath.Resolv
 	}
 	cmd.Flags().StringVar(&path, "vault", "", "Absolute path to the local vault (WSL also accepts Windows drive paths)")
 	cmd.Flags().BoolVar(&create, "create", false, "Allow creation of a missing vault directory")
-	cmd.Flags().StringSliceVar(&agents, "agents", nil, "Install shared capture skill for pi,codex (visible to both); omit to install template only")
+	cmd.Flags().StringSliceVar(&agents, "agents", []string{"pi", "codex"}, "Install shared capture skill for pi,codex (visible to both; installed by default)")
+	cmd.Flags().BoolVar(&noSkill, "no-skill", false, "Skip the default shared capture skill installation")
 	cmd.Flags().BoolVar(&plugin, "plugin", false, "Consent to download Karpathy LLM Wiki 1.28.0 from GitHub (Apache-2.0); requires Obsidian >= 1.11.4; preserve existing installs")
 	return cmd
 }
