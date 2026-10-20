@@ -68,11 +68,11 @@
 - `publishArtifacts(entries, dir, { lookup, publish, wait })` checks registry integrity before and after each publish, skips only a matching existing version, and publishes platform entries before main.
 - CLI `node scripts/release.mjs publish vX.Y.Z dist` uses public npm registry reads and `npm publish ./<tarball> --access public` through `execFileSync`.
 
-- [ ] **Step 1: Write failing tests** with injected registry/publish functions: absent versions publish in platform-first order; identical existing versions skip; mismatched existing integrity stops; a successful publish waits for registry visibility before continuing; a partial retry publishes only remaining entries.
-- [ ] **Step 2: Run** `mise exec -- node --test tests/release.test.mjs`; expect missing `publishArtifacts` behavior.
-- [ ] **Step 3: Implement** GET `https://registry.npmjs.org/<encoded-package>/<version>` with 404 meaning absent and other non-200 responses failing. Poll for up to five minutes after publish; accept only the exact manifest integrity. Keep stdout free of credentials.
-- [ ] **Step 4: Run** focused and full Node tests; expect all to pass.
-- [ ] **Step 5: Commit** with message `feat: make npm publication retry safe`.
+- [x] **Step 1: Write failing tests** with injected registry/publish functions: absent versions publish in platform-first order; identical existing versions skip; mismatched existing integrity stops; a successful publish waits for registry visibility before continuing; a partial retry publishes only remaining entries.
+- [x] **Step 2: Run** `mise exec -- node --test tests/release.test.mjs`; expect missing `publishArtifacts` behavior.
+- [x] **Step 3: Implement** GET `https://registry.npmjs.org/<encoded-package>/<version>` with 404 meaning absent and other non-200 responses failing. Poll for up to five minutes after publish; accept only the exact manifest integrity. Keep stdout free of credentials.
+- [x] **Step 4: Run** focused and full Node tests; expect all to pass.
+- [x] **Step 5: Commit** with message `feat: make npm publication retry safe`.
 
 ### Task 4: Protected GitHub release workflow and operator docs
 
