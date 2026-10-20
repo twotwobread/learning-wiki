@@ -4,6 +4,9 @@ import { mkdtemp, mkdir, writeFile, copyFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
+import * as release from '../scripts/release.mjs';
+import { createHash } from 'node:crypto';
+import { readFile, readdir } from 'node:fs/promises';
 import { validateRelease } from '../scripts/release.mjs';
 
 function fixture() {
@@ -96,3 +99,71 @@ test('CLI preflight verifies isolated clean checkout and main ancestry without c
   git('update-ref', 'refs/remotes/origin/main', 'HEAD');
   assert.equal(run('preflight', 'v1.2.3').status, 0);
 });
+
+
+async function artifactFixture(t) {
+  const dir = await mkdtemp(join(tmpdir(), 'release artifacts ; '));
+  t.after(() => rm(dir, { recursive: true, force: true }));
+  const targets = JSON.parse(await readFile(new URL('../npm/learning-wiki/bin/targets.json', import.meta.url)));
+  const names = [...Object.values(targets).map(target => target.package), '@suyoung9137/learning-wiki'];
+  const artifacts = [];
+  async function pack(index, metadata) {
+    const staging = join(dir, 'staging');
+    await mkdir(join(staging, 'package'), { recursive: true });
+    await writeFile(join(staging, 'package/package.json'), JSON.stringify(metadata));
+    const file = `artifact-${index}.tgz`;
+    execFileSync('tar', ['-czf', join(dir, file), '-C', staging, 'package']);
+    await rm(staging, { recursive: true });
+    return { name: names[index], version: '1.2.3', file, integrity: 'sha512-' + createHash('sha512').update(await readFile(join(dir, file))).digest('base64') };
+  }
+  for (const [index, name] of names.entries()) artifacts.push(await pack(index, { name, version: '1.2.3' }));
+  const save = () => writeFile(join(dir, 'artifacts.json'), JSON.stringify(artifacts));
+  await save();
+  return { dir, artifacts, save, pack };
+}
+const artifactError = error => error instanceof Error && error.code === 'ERR_RELEASE_ARTIFACT';
+test('verifies exact artifacts in platform-first order without changing files', async t => {
+  const f = await artifactFixture(t);
+  const before = await readdir(f.dir);
+  assert.equal(typeof release.verifyArtifacts, 'function');
+  assert.deepEqual(await release.verifyArtifacts(f.dir, '1.2.3'), f.artifacts);
+  assert.deepEqual(await readdir(f.dir), before);
+  const result = spawnSync(process.execPath, ['scripts/release.mjs', 'verify', 'v1.2.3', f.dir], { encoding: 'utf8' });
+  assert.equal(result.status, 0, result.stderr);
+  assert.notEqual(spawnSync(process.execPath, ['scripts/release.mjs', 'verify', '1.2.3', f.dir]).status, 0);
+});
+for (const [name, change] of Object.entries({
+  'missing entry': f => { f.artifacts.pop(); },
+  'duplicate package': f => { f.artifacts[1].name = f.artifacts[0].name; },
+  'wrong order': f => { f.artifacts.reverse(); },
+  'wrong version': f => { f.artifacts[0].version = '1.2.4'; },
+  'unknown field': f => { f.artifacts[0].extra = true; },
+  'missing field': f => { delete f.artifacts[0].integrity; },
+  'unsafe filename': f => { f.artifacts[0].file = '../outside.tgz'; },
+  'option filename': f => { f.artifacts[0].file = '--help.tgz'; },
+  'wrong extension': f => { f.artifacts[0].file = 'file.tar'; },
+  'duplicate filename': f => { f.artifacts[1].file = f.artifacts[0].file; },
+  'wrong integrity': f => { f.artifacts[0].integrity = 'sha512-' + Buffer.alloc(64).toString('base64'); },
+  'noncanonical integrity': f => { f.artifacts[0].integrity += '\n'; },
+  'missing tarball': f => rm(join(f.dir, f.artifacts[0].file)),
+  'extra tarball': f => writeFile(join(f.dir, 'extra.tgz'), 'extra'),
+  'changed bytes': f => writeFile(join(f.dir, f.artifacts[0].file), 'corrupt'),
+  'wrong archived name': async f => { f.artifacts[0] = await f.pack(0, { name: '@other/tool', version: '1.2.3' }); },
+  'wrong archived version': async f => { f.artifacts[0] = await f.pack(0, { name: f.artifacts[0].name, version: '1.2.4' }); },
+})) {
+  test(`rejects artifact ${name}`, async t => {
+    const f = await artifactFixture(t);
+    await change(f);
+    await f.save();
+    assert.equal(typeof release.verifyArtifacts, 'function');
+    await assert.rejects(() => release.verifyArtifacts(f.dir, '1.2.3'), artifactError);
+  });
+}
+for (const manifest of [null, {}, [], [null]]) {
+  test(`rejects malformed artifact manifest ${JSON.stringify(manifest)}`, async t => {
+    const f = await artifactFixture(t);
+    await writeFile(join(f.dir, 'artifacts.json'), JSON.stringify(manifest));
+    assert.equal(typeof release.verifyArtifacts, 'function');
+    await assert.rejects(() => release.verifyArtifacts(f.dir, '1.2.3'), artifactError);
+  });
+}

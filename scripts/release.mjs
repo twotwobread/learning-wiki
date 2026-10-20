@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir, lstat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +30,46 @@ export function validateRelease(tag, main, targets, platforms) {
   return version;
 }
 
+function requireArtifact(condition, message) {
+  if (!condition) throw Object.assign(new Error(message), { code: 'ERR_RELEASE_ARTIFACT' });
+}
+
+export async function verifyArtifacts(dir, version) {
+  try {
+    requireArtifact(typeof version === 'string' && /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(version)?.[0] === version, 'Invalid artifact release version');
+    const root = dirname(dirname(fileURLToPath(import.meta.url)));
+    const targets = JSON.parse(await readFile(join(root, 'npm/learning-wiki/bin/targets.json'), 'utf8'));
+    const main = JSON.parse(await readFile(join(root, 'npm/learning-wiki/package.json'), 'utf8'));
+    const names = [...Object.values(targets).map(target => target.package), main.name];
+    const artifacts = JSON.parse(await readFile(join(dir, 'artifacts.json'), 'utf8'));
+    requireArtifact(Array.isArray(artifacts) && artifacts.length === names.length, 'Artifact package set differs from targets');
+    const files = new Set();
+    for (const [index, artifact] of artifacts.entries()) {
+      requireArtifact(artifact && typeof artifact === 'object' && !Array.isArray(artifact) && Object.keys(artifact).length === 4 && ['name', 'version', 'file', 'integrity'].every(key => Object.hasOwn(artifact, key)), 'Invalid artifact manifest schema');
+      requireArtifact(artifact.name === names[index] && artifact.version === version, 'Artifact identity or order differs from release');
+      requireArtifact(typeof artifact.file === 'string' && /^[a-zA-Z0-9][a-zA-Z0-9._-]*\.tgz$/.exec(artifact.file)?.[0] === artifact.file && !files.has(artifact.file), 'Unsafe or duplicate artifact filename');
+      files.add(artifact.file);
+      requireArtifact(typeof artifact.integrity === 'string' && /^sha512-[A-Za-z0-9+/]{86}==$/.exec(artifact.integrity)?.[0] === artifact.integrity, 'Invalid artifact integrity');
+    }
+    const actual = (await readdir(dir)).filter(file => file.endsWith('.tgz'));
+    requireArtifact(actual.length === files.size && actual.every(file => files.has(file)), 'Tarball files differ from manifest');
+    for (const artifact of artifacts) {
+      const path = resolve(dir, artifact.file);
+      requireArtifact((await lstat(path)).isFile(), 'Artifact must be a regular file');
+      const integrity = 'sha512-' + createHash('sha512').update(await readFile(path)).digest('base64');
+      requireArtifact(integrity === artifact.integrity, 'Artifact bytes differ from integrity');
+      const entries = execFileSync('tar', ['-tzf', path], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).split('\n');
+      requireArtifact(entries.filter(entry => entry === 'package/package.json').length === 1, 'Archive must contain one package manifest');
+      const pkg = JSON.parse(execFileSync('tar', ['-xOzf', path, 'package/package.json'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
+      requireArtifact(pkg?.name === artifact.name && pkg.version === version, 'Archived package differs from release');
+    }
+    return artifacts;
+  } catch (cause) {
+    if (cause.code === 'ERR_RELEASE_ARTIFACT') throw cause;
+    throw Object.assign(new Error('Unable to verify release artifacts', { cause }), { code: 'ERR_RELEASE_ARTIFACT' });
+  }
+}
+
 async function preflight(tag) {
   const root = dirname(dirname(fileURLToPath(import.meta.url)));
   const readJSON = async path => JSON.parse(await readFile(join(root, path), 'utf8'));
@@ -49,8 +90,14 @@ async function preflight(tag) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const [command, tag, ...extra] = process.argv.slice(2);
-    if (command !== 'preflight' || !tag || extra.length) throw new Error('Usage: node scripts/release.mjs preflight vX.Y.Z');
-    await preflight(tag);
+    if (command === 'preflight' && tag && extra.length === 0) {
+      await preflight(tag);
+    } else if (command === 'verify' && typeof tag === 'string' && /^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/.exec(tag)?.[0] === tag && extra.length === 1) {
+      await verifyArtifacts(extra[0], tag.slice(1));
+      console.log(`Release artifacts verified for ${tag.slice(1)}`);
+    } else {
+      throw new Error('Usage: node scripts/release.mjs preflight vX.Y.Z | verify vX.Y.Z dist');
+    }
   } catch (error) {
     console.error(error.message);
     process.exitCode = 1;
