@@ -36,11 +36,11 @@
 - `validateRelease(tag, main, targets, platforms)` returns the version or throws for malformed tag, target mismatch, version mismatch, or optional dependency mismatch.
 - CLI `node scripts/release.mjs preflight vX.Y.Z` additionally checks a clean checkout and `HEAD` ancestry in `origin/main`.
 
-- [ ] **Step 1: Write failing tests** for valid `v0.3.0`, malformed `v0.3`, mismatched platform version, missing optional dependency, and unsupported target metadata. Use literal fixture package objects and `assert.throws`.
-- [ ] **Step 2: Run** `mise exec -- node --test tests/release.test.mjs`; expect the import or export to fail because `release.mjs` does not exist.
-- [ ] **Step 3: Implement** `validateRelease` with `^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`; derive platform package expectations from every entry in `targets.json`, and require package names, `os`/`cpu` arrays, optional dependencies, and versions to match. In CLI preflight run `git diff --quiet`, `git diff --cached --quiet`, `git status --porcelain --untracked-files=normal`, and `git merge-base --is-ancestor HEAD origin/main` with argument arrays, never shell interpolation.
-- [ ] **Step 4: Run** `mise exec -- node --test tests/release.test.mjs` and `mise exec -- npm test`; expect all tests to pass.
-- [ ] **Step 5: Commit** `scripts/release.mjs` and `tests/release.test.mjs` with message `feat: validate tagged npm release metadata`.
+- [x] **Step 1: Write failing tests** for valid `v0.3.0`, malformed `v0.3`, mismatched platform version, missing optional dependency, and unsupported target metadata. Use literal fixture package objects and `assert.throws`.
+- [x] **Step 2: Run** `mise exec -- node --test tests/release.test.mjs`; expect the import or export to fail because `release.mjs` does not exist.
+- [x] **Step 3: Implement** `validateRelease` with `^v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$`; derive platform package expectations from every entry in `targets.json`, and require package names, `os`/`cpu` arrays, optional dependencies, and versions to match. In CLI preflight run `git diff --quiet`, `git diff --cached --quiet`, `git status --porcelain --untracked-files=normal`, and `git merge-base --is-ancestor HEAD origin/main` with argument arrays, never shell interpolation.
+- [x] **Step 4: Run** `mise exec -- node --test tests/release.test.mjs` and `mise exec -- npm test`; expect all tests to pass.
+- [x] **Step 5: Commit** `scripts/release.mjs` and `tests/release.test.mjs` with message `feat: validate tagged npm release metadata`.
 
 ### Task 2: Exact artifact verification
 
