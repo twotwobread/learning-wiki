@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/twotwobread/learning-wiki/internal/config"
@@ -119,5 +120,28 @@ func TestWizardAbortAndConflict(t *testing.T) {
 	}
 	if p.confirmations != 0 {
 		t.Fatal("requested approval despite existing binding conflict")
+	}
+}
+
+func TestWizardDefaultAgents(t *testing.T) {
+	if got := defaultWizardAgents(); !reflect.DeepEqual(got, []string{"pi", "codex"}) {
+		t.Fatalf("default agents = %v; want pi and codex", got)
+	}
+}
+
+func TestWizardDeselectionRemainsEmpty(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "vault")
+	configPath := filepath.Join(t.TempDir(), "config.json")
+	plan, err := planWizard(context.Background(), &scriptedPrompt{path: root, answers: []bool{true, true}}, configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Agents) != 0 {
+		t.Fatalf("explicit deselection lost: %v", plan.Agents)
+	}
+	for _, path := range []string{root, configPath} {
+		if _, err := os.Stat(path); !errors.Is(err, fs.ErrNotExist) {
+			t.Fatalf("unexpected write: %s", path)
+		}
 	}
 }

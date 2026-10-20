@@ -29,14 +29,18 @@ try {
     assert.equal(result.status, code, result.stderr);
   }
   const vault = join(temp, '한글 Vault');
-  const args = ['init', '--vault', vault, '--create', '--agents', 'pi,codex'];
+  const args = ['init', '--vault', vault, '--create'];
   for (let i = 0; i < 2; i++) {
     execFileSync('npx', ['--offline', '--no-install', 'learning-wiki', ...args], { cwd: project, env, stdio: 'inherit' });
   }
   const configDir = process.platform === 'darwin' ? join(home, 'Library/Application Support') : join(home, 'config');
   assert.equal(JSON.parse(await readFile(join(configDir, 'learning-wiki/config.json'), 'utf8')).vault_path, vault);
   assert.ok((await stat(join(vault, 'templates/learning-note.md'))).isFile());
-  const capture = join(home, '.agents/skills/learning-capture/scripts/capture.mjs');
+  const skill = join(home, '.agents/skills/learning-capture');
+  for (const file of ['SKILL.md', 'binding.json', 'scripts/capture.mjs']) {
+    assert.ok((await stat(join(skill, file))).isFile());
+  }
+  const capture = join(skill, 'scripts/capture.mjs');
   const note = '# 설치 검증 노트\n\n근거: 로컬 패키지 테스트.\n';
   const captured = spawnSync(process.execPath, [capture], { cwd: project, env, input: note, encoding: 'utf8', timeout: 10000 });
   assert.equal(captured.status, 0, captured.stderr);
