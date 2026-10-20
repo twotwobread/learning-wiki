@@ -25,7 +25,15 @@ Node.js 22 이상 필요. Go·mise·저장소 clone은 최종 사용자에게 �
 npx @suyoung9137/learning-wiki@0.2.0 init
 ```
 
-레지스트리 발행 전 검증에는 아래 로컬 패키징 절차를 사용합니다.
+이미 발행된 `0.2.0`에서는 수집 스킬 설치에 에이전트 선택이 필요합니다. 대화형 마법사에서 Space로 pi 또는 Codex를 선택하거나, 비대화형으로 명시합니다:
+
+```bash
+npx @suyoung9137/learning-wiki@0.2.0 init --vault "$HOME/Documents/LearningWiki" --create --agents codex
+```
+
+이 브랜치의 변경은 다음 릴리스에 반영됩니다. `init --vault`는 공통 스킬을 기본 설치하고 `--no-skill`로 생략합니다. 대화형 마법사에서는 pi·Codex를 기본 선택하며 모두 해제하면 스킬 설치를 생략합니다. Codex는 `~/.agents/skills/learning-capture`에서 스킬을 탐색하며 발견되지 않으면 재시작 후 확인합니다. 발행된 `0.2.0`의 동작은 바뀌지 않습니다.
+
+다음 릴리스 발행 전 검증에는 아래 로컬 패키징 절차를 사용합니다.
 
 ## 구조
 

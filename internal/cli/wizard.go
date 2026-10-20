@@ -77,7 +77,7 @@ func planWizardWithResolver(ctx context.Context, p setupPrompt, configPath strin
 	if err != nil {
 		return setupPlan{}, err
 	}
-	approved, err := p.Confirm(ctx, "이 설정으로 초기화할까요?", fmt.Sprintf("Vault: %s\n설정: %s\n에이전트: %v\n학습 템플릿 설치 및 로컬 설정 저장\n선택 시 ~/.agents/skills/에 공통 스킬 설치 (pi·Codex 모두 탐색 가능)\n기존 파일 보존. 플러그인 설치 요청: %t (기존 설치본 유지).\n활성화·인증은 Obsidian에서 직접 수행.", resolved, configPath, plan.Agents, plan.Plugin))
+	approved, err := p.Confirm(ctx, "이 설정으로 초기화할까요?", fmt.Sprintf("Vault: %s\n설정: %s\n에이전트: %v\n학습 템플릿 설치 및 로컬 설정 저장\n에이전트가 선택되어 있으면 ~/.agents/skills/learning-capture에 공통 스킬 설치 (pi·Codex 모두 탐색 가능)\n기존 파일 보존. 플러그인 설치 요청: %t (기존 설치본 유지).\n활성화·인증은 Obsidian에서 직접 수행.", resolved, configPath, plan.Agents, plan.Plugin))
 	if err != nil {
 		return setupPlan{}, err
 	}
@@ -110,8 +110,8 @@ func (p huhPrompt) Path(ctx context.Context) (string, error) {
 	return value, err
 }
 func (p huhPrompt) Agents(ctx context.Context) ([]string, error) {
-	var agents []string
-	err := p.run(ctx, huh.NewMultiSelect[string]().Title("수집 스킬을 사용할 에이전트").Description("Space로 체크 · Enter로 진행. 커서 이동만으로는 선택되지 않음. 공유 경로 ~/.agents/skills/ 사용 (pi·Codex 모두 탐색). 미선택 시 템플릿만 설치.").Options(huh.NewOption("pi", "pi"), huh.NewOption("Codex", "codex")).Value(&agents))
+	agents := defaultWizardAgents()
+	err := p.run(ctx, huh.NewMultiSelect[string]().Title("수집 스킬을 사용할 에이전트").Description("기본: pi·Codex 모두 선택. Space로 선택 해제 · Enter로 진행. 공유 경로 ~/.agents/skills/ 사용 (pi·Codex 모두 탐색). 미선택 시 템플릿만 설치.").Options(huh.NewOption("pi", "pi"), huh.NewOption("Codex", "codex")).Value(&agents))
 	return agents, err
 }
 
@@ -131,3 +131,5 @@ func isTerminal(stream any) bool {
 	f, ok := stream.(interface{ Fd() uintptr })
 	return ok && term.IsTerminal(int(f.Fd()))
 }
+
+func defaultWizardAgents() []string { return []string{"pi", "codex"} }
