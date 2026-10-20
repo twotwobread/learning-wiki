@@ -84,12 +84,11 @@
 - Workflow `push.tags: [v*]`; jobs `preflight`, `build`, `smoke` (Linux x64 and macOS arm64 matrix), `publish`.
 - The build uploads `dist/artifacts.json` and exactly three tarballs. Smoke and publish jobs download the same named artifact into `dist`.
 
-- [ ] **Step 1: Write a failing workflow contract check** using `actionlint` (if installed) and a Node assertion that reads the workflow and confirms the tag trigger, environment name, OIDC permission, two native runners, and artifact upload/download. Check actual job dependencies rather than text snapshots.
-- [ ] **Step 2: Run** the check; expect failure because `release.yml` does not exist.
-- [ ] **Step 3: Add workflow**: checkout with full history and fetch `origin/main`; preflight before building; install mise-pinned tools; run Go tests, race tests, vet, Node tests, pack and verify; upload artifact; smoke on `ubuntu-24.04` and `macos-15` with `npm run test:package`; protected publish job installs npm `11.21.0`, verifies artifacts, and invokes release publish script. Use `concurrency` to prevent overlapping releases.
-- [ ] **Step 4: Update docs** with the 0.2.0 release status, the exact environment protection and npm trusted publisher settings, the two-day first-publish window, and the documented partial retry procedure.
-- [ ] **Step 5: Run** `actionlint .github/workflows/release.yml` if available, `mise exec -- npm test`, `mise exec -- go test ./...`, `mise exec -- go test -race ./...`, `mise exec -- npm run pack:local`, `mise exec -- node scripts/release.mjs verify v0.2.0 dist`, and `mise exec -- npm run test:package`; expect all checks to pass.
-- [ ] **Step 6: Commit** with message `ci: add protected OIDC npm release workflow`.
+- [x] **Step 1: Review the workflow contract** against the approved design: tag trigger, environment approval, OIDC permission, native runners, artifact handoff, and job dependencies. Use `actionlint` for YAML, expression, action, and shell validation; avoid a static test that mirrors workflow text.
+- [x] **Step 3: Add workflow**: checkout with full history and fetch `origin/main`; preflight before building; install mise-pinned tools; run Go tests, race tests, vet, Node tests, pack and verify; upload artifact; smoke on `ubuntu-24.04` and `macos-15` with `npm run test:package`; protected publish job installs npm `11.21.0`, verifies artifacts, and invokes release publish script. Use `concurrency` to prevent overlapping releases.
+- [x] **Step 4: Update docs** with the 0.2.0 release status, the exact environment protection and npm trusted publisher settings, the two-day first-publish window, and the documented partial retry procedure.
+- [x] **Step 5: Run** `actionlint .github/workflows/release.yml` if available, `mise exec -- npm test`, `mise exec -- go test ./...`, `mise exec -- go test -race ./...`, `mise exec -- npm run pack:local`, `mise exec -- node scripts/release.mjs verify v0.2.0 dist`, and `mise exec -- npm run test:package`; expect all checks to pass.
+- [x] **Step 6: Commit** with message `ci: add protected OIDC npm release workflow`.
 
 ## Final review
 
