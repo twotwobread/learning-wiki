@@ -19,7 +19,7 @@ export function validateRelease(tag, main, targets, platforms) {
   const names = [];
   for (const [key, target] of entries) {
     requireMetadata(target && /^[a-z0-9]+-[a-z0-9]+$/.test(key) && key === `${target.platform}-${target.arch}`, `Invalid target key: ${key}`);
-    requireMetadata(target.package === `${main.name}-${key}` && /^[a-z0-9]+$/.test(target.goos) && /^[a-z0-9]+$/.test(target.goarch) && target.executable === (target.platform === 'win32' ? 'learning-wiki.exe' : 'learning-wiki'), `Invalid target metadata: ${key}`);
+    requireMetadata(target.package === `${main.name}-${key}` && typeof target.goos === 'string' && /^[a-z0-9]+$/.test(target.goos) && typeof target.goarch === 'string' && /^[a-z0-9]+$/.test(target.goarch) && target.executable === (target.platform === 'win32' ? 'learning-wiki.exe' : 'learning-wiki'), `Invalid target metadata: ${key}`);
     const pkg = platforms[key];
     requireMetadata(pkg?.name === target.package && pkg.version === version && Array.isArray(pkg.os) && pkg.os.length === 1 && pkg.os[0] === target.platform && Array.isArray(pkg.cpu) && pkg.cpu.length === 1 && pkg.cpu[0] === target.arch, `Platform package differs from target: ${key}`);
     names.push(target.package);
