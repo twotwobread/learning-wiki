@@ -52,11 +52,11 @@
 - `verifyArtifacts(dir, version)` returns the three manifest entries in platform-first/main-last order. Each entry contains `name`, `version`, `file`, and `integrity`.
 - CLI `node scripts/release.mjs verify vX.Y.Z dist` exits nonzero for any invalid or extra artifact.
 
-- [ ] **Step 1: Write failing tests** using `t.TempDir` equivalent `mkdtemp` and tiny `.tgz` fixtures built with `tar`; assert exact expected names and filenames, correct SHA-512, tampering failure, missing or extra tarball failure, and package.json name/version mismatch inside the tarball.
-- [ ] **Step 2: Run** `mise exec -- node --test tests/release.test.mjs`; expect missing `verifyArtifacts` behavior.
-- [ ] **Step 3: Implement** manifest shape and exact file set checks; compute `sha512-` plus base64 from each tarball; read `package/package.json` with `tar -xOzf` via `execFileSync`; compare name/version; reject path escapes in manifest filenames.
-- [ ] **Step 4: Run** the focused tests and full `mise exec -- npm test`; expect all tests to pass.
-- [ ] **Step 5: Commit** with message `feat: verify exact npm release artifacts`.
+- [x] **Step 1: Write failing tests** using `t.TempDir` equivalent `mkdtemp` and tiny `.tgz` fixtures built with `tar`; assert exact expected names and filenames, correct SHA-512, tampering failure, missing or extra tarball failure, and package.json name/version mismatch inside the tarball.
+- [x] **Step 2: Run** `mise exec -- node --test tests/release.test.mjs`; expect missing `verifyArtifacts` behavior.
+- [x] **Step 3: Implement** manifest shape and exact file set checks; compute `sha512-` plus base64 from each tarball; read `package/package.json` with `tar -xOzf` via `execFileSync`; compare name/version; reject path escapes in manifest filenames.
+- [x] **Step 4: Run** the focused tests and full `mise exec -- npm test`; expect all tests to pass.
+- [x] **Step 5: Commit** with message `feat: verify exact npm release artifacts`.
 
 ### Task 3: Safe ordered publication
 
