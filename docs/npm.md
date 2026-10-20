@@ -5,35 +5,23 @@
 - 메인 패키지 `@suyoung9137/learning-wiki`와 대상별 바이너리 패키지 `@suyoung9137/learning-wiki-linux-x64`, `@suyoung9137/learning-wiki-darwin-arm64` 사용
 - npm 계정: `suyoung9137`
 - 자체 코드: MIT 라이선스. 번들 의존성은 해당 라이선스와 고지 적용
-- `0.2.0`은 두 플랫폼 패키지와 메인 패키지를 같은 버전으로 발행 완료. 개발용 루트 package.json만 `private: true` 유지
+- 세 공개 패키지는 같은 버전으로 발행. 개발용 루트 package.json만 `private: true` 유지
 - 레지스트리 제공 버전 확인: `npm view @suyoung9137/learning-wiki version`
+- 이전 버전의 변경 사항과 설치 방법: [GitHub Releases](https://github.com/twotwobread/learning-wiki/releases)
 
 ## 레지스트리 설치
 
-기존 `0.1.0`은 WSL Linux x64에서 실행:
-
-```bash
-npx @suyoung9137/learning-wiki@0.1.0 --version
-npx @suyoung9137/learning-wiki@0.1.0 init
-```
-
 Node.js 22 이상 필요. Go·mise·저장소 clone은 최종 사용자에게 불필요.
 
-`0.2.0`은 WSL Linux x64와 macOS arm64에서 같은 메인 명령을 사용합니다:
+`0.3.0` 발행 후 WSL Linux x64와 macOS arm64에서 같은 메인 명령을 사용합니다:
 
 ```bash
-npx @suyoung9137/learning-wiki@0.2.0 init
+npx @suyoung9137/learning-wiki@0.3.0 init
 ```
 
-이미 발행된 `0.2.0`에서는 수집 스킬 설치에 에이전트 선택이 필요합니다. 대화형 마법사에서 Space로 pi 또는 Codex를 선택하거나, 비대화형으로 명시합니다:
+`init --vault`는 공통 스킬을 기본 설치하고 `--no-skill`로 생략합니다. 대화형 마법사에서는 pi·Codex를 기본 선택하며 모두 해제하면 스킬 설치를 생략합니다. Codex는 `~/.agents/skills/learning-capture`에서 스킬을 탐색하며 발견되지 않으면 재시작 후 확인합니다.
 
-```bash
-npx @suyoung9137/learning-wiki@0.2.0 init --vault "$HOME/Documents/LearningWiki" --create --agents codex
-```
-
-이 브랜치의 변경은 다음 릴리스에 반영됩니다. `init --vault`는 공통 스킬을 기본 설치하고 `--no-skill`로 생략합니다. 대화형 마법사에서는 pi·Codex를 기본 선택하며 모두 해제하면 스킬 설치를 생략합니다. Codex는 `~/.agents/skills/learning-capture`에서 스킬을 탐색하며 발견되지 않으면 재시작 후 확인합니다. 발행된 `0.2.0`의 동작은 바뀌지 않습니다.
-
-다음 릴리스 발행 전 검증에는 아래 로컬 패키징 절차를 사용합니다.
+레지스트리 발행 전에 아래 로컬 패키징 절차로 같은 버전을 검증합니다.
 
 ## 구조
 
@@ -75,8 +63,8 @@ mise exec -- npm run test:package
 ```bash
 target="$(node -p 'process.platform + "-" + process.arch')"
 npm install --offline --ignore-scripts --no-audit --no-fund \
-  "/absolute/path/to/dist/suyoung9137-learning-wiki-${target}-0.2.0.tgz" \
-  /absolute/path/to/dist/suyoung9137-learning-wiki-0.2.0.tgz
+  "/absolute/path/to/dist/suyoung9137-learning-wiki-${target}-0.3.0.tgz" \
+  /absolute/path/to/dist/suyoung9137-learning-wiki-0.3.0.tgz
 npx --offline --no-install learning-wiki --version
 npx --offline --no-install learning-wiki init
 ```
@@ -91,9 +79,9 @@ npx --offline --no-install learning-wiki init
 - `.github/workflows/ci.yml`: Linux x64와 macOS arm64에서 Go/Node 테스트·race 검사·로컬 패키징 검증 및 tarball artifact 업로드. publish 단계 없음
 - 로컬 tarball 검증은 실제 npm 레지스트리 설치·Obsidian ingest 검증과 구분
 
-## 태그 기반 배포 (`0.2.0` 이후)
+## 태그 기반 배포
 
-`0.2.0` 수동 발행은 완료했습니다. 이후 버전은 세 패키지의 버전을 함께 올려 `main`에 반영하고, 해당 커밋에 `vX.Y.Z` 태그를 push합니다. `.github/workflows/release.yml`은 정확한 안정 버전 태그·패키지 메타데이터·깨끗한 checkout·`origin/main` 조상을 확인합니다. Linux에서 한 번 빌드한 세 tarball과 `artifacts.json`을 하나의 artifact로 업로드하고, Linux x64와 macOS arm64에서 같은 artifact를 검증합니다. 두 smoke 작업이 성공하면 `npm-release` Environment 승인 후 같은 파일을 OIDC로 발행합니다.
+`0.3.0`부터 세 패키지의 버전을 함께 올려 `main`에 반영하고, 해당 커밋에 `vX.Y.Z` 태그를 push합니다. `.github/workflows/release.yml`은 정확한 안정 버전 태그·패키지 메타데이터·깨끗한 checkout·`origin/main` 조상을 확인합니다. Linux에서 한 번 빌드한 세 tarball과 `artifacts.json`을 하나의 artifact로 업로드하고, Linux x64와 macOS arm64에서 같은 artifact를 검증합니다. 두 smoke 작업이 성공하면 `npm-release` Environment 승인 후 같은 파일을 OIDC로 발행합니다.
 
 ### 운영 설정 (첫 자동 배포 직전)
 

@@ -1,6 +1,6 @@
 {
   "name": "@suyoung9137/learning-wiki",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Connect local learning sessions to an Obsidian vault",
   "license": "MIT",
   "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
@@ -9,7 +9,7 @@
   "files": ["bin/", "README.md", "LICENSE"],
   "engines": { "node": ">=22" },
   "optionalDependencies": {
-    "@suyoung9137/learning-wiki-linux-x64": "0.2.0",
-    "@suyoung9137/learning-wiki-darwin-arm64": "0.2.0"
+    "@suyoung9137/learning-wiki-linux-x64": "0.3.0",
+    "@suyoung9137/learning-wiki-darwin-arm64": "0.3.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@suyoung9137/learning-wiki-darwin-arm64",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "macOS arm64 binary for learning-wiki",
   "license": "MIT",
   "publishConfig": { "access": "public", "registry": "https://registry.npmjs.org/" },
