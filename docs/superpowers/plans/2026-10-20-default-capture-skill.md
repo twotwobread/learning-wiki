@@ -26,11 +26,11 @@
 
 **Interfaces:** `newInitCommandWithResolver` continues to pass `[]string` to `resources.Plan`; `--no-skill` converts the default to nil and conflicts with explicitly provided `--agents`.
 
-- [ ] **Step 1: Write failing tests.** In `resources_test.go`, remove `--agents pi,codex` from the existing repeat-init test and assert `SKILL.md`, `binding.json`, and `capture.mjs` exist and are preserved. Add a test running `init --vault <temp> --create --no-skill` and assert the template/config exist while the shared skill and plugin files do not. In `init_test.go`, add a test that `--no-skill --agents codex` returns exit 2 without creating Vault/config and that bare `--no-skill` needs `--vault`.
-- [ ] **Step 2: Verify red.** Run `mise exec -- go test ./internal/cli -run 'TestInit(Default|NoSkill|SelectedAgents)' -count=1`; expect default skill absence or unknown flag failure.
-- [ ] **Step 3: Implement.** Set `--agents` default to `[]string{"pi", "codex"}`. Add `--no-skill`, reject it when `--agents` was explicitly changed, include it in the noninteractive `--vault` validation, and pass nil agents to `resources.Plan` when selected. Update flag/help text to describe the default.
-- [ ] **Step 4: Verify green.** Run the same focused command and `mise exec -- go test ./internal/cli`.
-- [ ] **Step 5: Commit.** Commit only the Go CLI/tests when passing.
+- [x] **Step 1: Write failing tests.** In `resources_test.go`, remove `--agents pi,codex` from the existing repeat-init test and assert `SKILL.md`, `binding.json`, and `capture.mjs` exist and are preserved. Add a test running `init --vault <temp> --create --no-skill` and assert the template/config exist while the shared skill and plugin files do not. In `init_test.go`, add a test that `--no-skill --agents codex` returns exit 2 without creating Vault/config and that bare `--no-skill` needs `--vault`.
+- [x] **Step 2: Verify red.** Run `mise exec -- go test ./internal/cli -run 'TestInit(Default|NoSkill|SelectedAgents)' -count=1`; expect default skill absence or unknown flag failure.
+- [x] **Step 3: Implement.** Set `--agents` default to `[]string{"pi", "codex"}`. Add `--no-skill`, reject it when `--agents` was explicitly changed, include it in the noninteractive `--vault` validation, and pass nil agents to `resources.Plan` when selected. Update flag/help text to describe the default.
+- [x] **Step 4: Verify green.** Run the same focused command and `mise exec -- go test ./internal/cli`.
+- [x] **Step 5: Commit.** Commit only the Go CLI/tests when passing.
 
 ### Task 2: Interactive default and package/docs integration
 
