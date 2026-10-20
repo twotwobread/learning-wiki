@@ -124,4 +124,4 @@ CGO_ENABLED=1 mise exec -- go test -race ./...
 
 ## 추가 검증 범위
 
-로컬 테스트는 임시 Vault·HOME에서 파일 설치와 재실행을 확인합니다. 실제 WSL/Windows 및 Mac Obsidian 앱에서의 플러그인 활성화·ingest, Codex 세션 수집 품질, 클라우드 동기화는 별도 검증 대상으로 기록합니다. npm `0.2.0` 공개 배포는 이 변경에 포함하지 않습니다.
+로컬 테스트는 임시 Vault·HOME에서 파일 설치와 재실행을 확인합니다. 실제 WSL/Windows 및 Mac Obsidian 앱에서의 플러그인 활성화·ingest, Codex 세션 수집 품질, 클라우드 동기화는 별도 검증 대상으로 기록합니다. npm 발행 여부는 레지스트리에서 확인합니다.

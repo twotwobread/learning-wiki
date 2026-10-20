@@ -2,15 +2,15 @@
 
 ## 상태
 
-- 메인 패키지 `@suyoung9137/learning-wiki`와 대상별 바이너리 패키지 `learning-wiki-linux-x64`, `learning-wiki-darwin-arm64` 사용
+- 메인 패키지 `@suyoung9137/learning-wiki`와 대상별 바이너리 패키지 `@suyoung9137/learning-wiki-linux-x64`, `@suyoung9137/learning-wiki-darwin-arm64` 사용
 - npm 계정: `suyoung9137`
 - 자체 코드: MIT 라이선스. 번들 의존성은 해당 라이선스와 고지 적용
-- `0.2.0`은 로컬 패키징·PR 대상이며 npm 공개 배포는 별도 작업. 개발용 루트 package.json만 `private: true` 유지
+- `0.2.0`은 두 플랫폼 패키지와 메인 패키지를 같은 버전으로 발행. 개발용 루트 package.json만 `private: true` 유지
 - 레지스트리 제공 버전 확인: `npm view @suyoung9137/learning-wiki version`
 
 ## 레지스트리 설치
 
-현재 배포된 `0.1.0`은 WSL Linux x64에서 실행:
+기존 `0.1.0`은 WSL Linux x64에서 실행:
 
 ```bash
 npx @suyoung9137/learning-wiki@0.1.0 --version
@@ -19,13 +19,13 @@ npx @suyoung9137/learning-wiki@0.1.0 init
 
 Node.js 22 이상 필요. Go·mise·저장소 clone은 최종 사용자에게 불필요.
 
-`0.2.0`이 배포되면 WSL Linux x64와 macOS arm64에서 같은 메인 명령을 사용합니다:
+`0.2.0`은 WSL Linux x64와 macOS arm64에서 같은 메인 명령을 사용합니다:
 
 ```bash
 npx @suyoung9137/learning-wiki@0.2.0 init
 ```
 
-배포 전 macOS arm64 검증은 아래 로컬 패키징 절차를 사용합니다.
+레지스트리 발행 전 검증에는 아래 로컬 패키징 절차를 사용합니다.
 
 ## 구조
 
