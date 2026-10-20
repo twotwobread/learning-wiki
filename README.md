@@ -8,10 +8,16 @@ pi/Codex에서 얻은 학습 내용을 로컬 Obsidian Vault에 저장하기 위
 
 설치·로컬 패키징·배포: [npm 패키지](docs/npm.md).
 
-`0.2.0` 실행 (WSL Linux x64 또는 macOS arm64, Node.js 22 이상):
+현재 발행된 `0.2.0` 실행 (WSL Linux x64 또는 macOS arm64, Node.js 22 이상):
 
 ```bash
 npx @suyoung9137/learning-wiki@0.2.0 init
+```
+
+`0.2.0`에서 수집 스킬을 함께 설치하려면 마법사에서 pi 또는 Codex를 선택하거나 `--agents codex`를 지정합니다. `0.3.0` 발행 후에는 아래처럼 `init`만으로 공통 스킬이 설치됩니다:
+
+```bash
+npx @suyoung9137/learning-wiki@0.3.0 init
 ```
 
 레지스트리 제공 여부: `npm view @suyoung9137/learning-wiki version`.

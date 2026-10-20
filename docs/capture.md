@@ -8,7 +8,7 @@
 mise exec -- go run ./cmd/learning-wiki init
 ```
 
-이 브랜치의 다음 릴리스에서는 마법사의 pi·Codex가 기본 선택됩니다 (Space로 선택 해제, Enter로 진행). 모두 해제하면 템플릿만 설치합니다.
+`0.3.0`에서는 마법사의 pi·Codex가 기본 선택됩니다 (Space로 선택 해제, Enter로 진행). 모두 해제하면 템플릿만 설치합니다.
 
 비대화형:
 
@@ -19,7 +19,7 @@ mise exec -- go run ./cmd/learning-wiki init \
 
 위 Windows 드라이브 경로 예시는 WSL에서 사용합니다. macOS에서는 `--vault "$HOME/Documents/LearningWiki"`처럼 로컬 절대 경로를 지정합니다.
 
-다음 릴리스에서는 `init --vault`만으로 `~/.agents/skills/learning-capture`에 공통 스킬을 설치합니다. `--no-skill`은 스킬 설치를 건너뛰고, `--agents pi,codex`도 계속 지원합니다. 이미 발행된 npm `0.2.0`에서는 스킬 설치에 `--agents pi` 또는 `--agents codex` (둘 다 사용 시 `--agents pi,codex`)가 필요합니다.
+`0.3.0`에서는 `init --vault`만으로 `~/.agents/skills/learning-capture`에 공통 스킬을 설치합니다. `--no-skill`은 스킬 설치를 건너뛰고, `--agents pi,codex`도 계속 지원합니다. 이미 발행된 npm `0.2.0`에서는 스킬 설치에 `--agents pi` 또는 `--agents codex` (둘 다 사용 시 `--agents pi,codex`)가 필요합니다.
 
 기존 Vault 연결에도 재실행 가능. 없는 Vault 생성은 `--create` 추가.
 

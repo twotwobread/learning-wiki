@@ -74,7 +74,7 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - 관리 하위 디렉터리의 심볼릭 링크는 거부. 동시 외부 변경에 대한 보안 격리 보장은 아님
 - 기기별 설정: Linux는 `$XDG_CONFIG_HOME/learning-wiki/config.json` (미설정 시 `~/.config/learning-wiki/config.json`), macOS는 `~/Library/Application Support/learning-wiki/config.json`
 - 같은 Vault 재연결 허용. 다른 Vault로의 설정 덮어쓰기 및 손상된 설정 교체는 거부
-- 학습 노트 템플릿과 공통 수집 스킬은 기본 설치. `--no-skill`로 스킬 설치 생략. `--agents pi,codex` 명시 선택도 지원 (다음 릴리스 기준; 발행된 npm `0.2.0`은 스킬 설치에 `--agents` 필요)
+- 학습 노트 템플릿과 공통 수집 스킬은 기본 설치. `--no-skill`로 스킬 설치 생략. `--agents pi,codex` 명시 선택도 지원 (`0.3.0` 기준; 발행된 npm `0.2.0`은 스킬 설치에 `--agents` 필요)
 - pi/Codex 공유 경로 `~/.agents/skills/` 사용. 미선택 에이전트에서도 보일 수 있음
 - 스킬 보조 스크립트 실행에 Node.js 필요. 상세: [학습 노트 수집](capture.md)
 - `--plugin`: 고정 버전 플러그인 파일 다운로드·설치 동의. 생략 시 건너뛰기
@@ -97,7 +97,7 @@ mise exec -- go run ./cmd/learning-wiki init --vault "$HOME/Documents/LearningWi
 빌드 버전 주입:
 
 ```bash
-mise exec -- go build -ldflags '-X main.version=0.2.0' -o bin/learning-wiki ./cmd/learning-wiki
+mise exec -- go build -ldflags '-X main.version=0.3.0' -o bin/learning-wiki ./cmd/learning-wiki
 ```
 
 검증:
