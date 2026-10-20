@@ -92,6 +92,6 @@
 
 ## Final review
 
-- [ ] Check the workflow against the approved design and official npm/GitHub documentation.
-- [ ] Run `git diff --check` and inspect every changed file.
-- [ ] Push the branch and open a PR into `main`; leave GitHub Environment and npm Trusted Publisher connections unconfigured until just before the first automated release.
+- [x] Check the workflow against the approved design and official npm/GitHub documentation.
+- [x] Run `git diff --check` and inspect every changed file.
+- [x] Push the branch and open a PR into `main`; leave GitHub Environment and npm Trusted Publisher connections unconfigured until just before the first automated release.
