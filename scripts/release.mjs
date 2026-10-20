@@ -86,15 +86,20 @@ export async function publishArtifacts(entries, dir, { lookup, publish, wait }) 
     await publish(resolve(dir, entry.file), entry);
     const started = Date.now();
     let waited = 0;
-    for (;;) {
-      const metadata = await lookup(entry);
-      if (metadata !== null) {
-        checkIntegrity(entry, metadata);
-        break;
-      }
+    const remainingBudget = () => {
       const remaining = 300000 - Math.max(waited, Date.now() - started);
       if (remaining <= 0) {
         throw Object.assign(new Error(`Registry visibility timed out for ${entry.name}@${entry.version}`), { code: 'ERR_RELEASE_VISIBILITY' });
+      }
+      return remaining;
+    };
+    for (;;) {
+      const timeoutMs = Math.min(30000, remainingBudget());
+      const metadata = await lookup(entry, { timeoutMs });
+      const remaining = remainingBudget();
+      if (metadata !== null) {
+        checkIntegrity(entry, metadata);
+        break;
       }
       const delay = Math.min(5000, remaining);
       await wait(delay);
@@ -106,9 +111,9 @@ export async function publishArtifacts(entries, dir, { lookup, publish, wait }) 
 async function publishRelease(dir, version) {
   const entries = await verifyArtifacts(dir, version);
   await publishArtifacts(entries, dir, {
-    lookup: async entry => {
+    lookup: async (entry, { timeoutMs = 30000 } = {}) => {
       const url = `https://registry.npmjs.org/${encodeURIComponent(entry.name)}/${encodeURIComponent(entry.version)}`;
-      const response = await fetch(url, { signal: AbortSignal.timeout(30000), cache: 'no-store' });
+      const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs), cache: 'no-store' });
       if (response.status === 404) return null;
       if (!response.ok) throw Object.assign(new Error(`Registry lookup failed: HTTP ${response.status}`), { code: 'ERR_RELEASE_REGISTRY' });
       return response.json();

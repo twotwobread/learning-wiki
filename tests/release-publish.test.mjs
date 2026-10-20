@@ -83,3 +83,59 @@ test('stops waiting after five minutes without publishing main', async () => {
   assert.equal(elapsed, 300000);
   assert.deepEqual(published, [entries[0].name]);
 });
+
+test('does not start another lookup once visibility deadline is reached', async t => {
+  let now = 0;
+  t.mock.method(Date, 'now', () => now);
+  let published = false;
+  let lookups = 0;
+  await assert.rejects(release.publishArtifacts(entries, '/tmp/dist', {
+    lookup: async () => {
+      if (!published) return null;
+      lookups++;
+      assert.ok(now < 300000, 'lookup started after deadline');
+      now = 299000;
+      return null;
+    },
+    publish: async () => { published = true; },
+    wait: async ms => { now += ms; },
+  }), { code: 'ERR_RELEASE_VISIBILITY' });
+  assert.equal(lookups, 1);
+});
+
+test('rejects matching metadata returned after the visibility deadline', async t => {
+  let now = 0;
+  t.mock.method(Date, 'now', () => now);
+  let published = false;
+  await assert.rejects(release.publishArtifacts(entries, '/tmp/dist', {
+    lookup: async entry => {
+      if (!published) return null;
+      now = 300001;
+      return metadata(entry);
+    },
+    publish: async () => { published = true; },
+    wait: async () => {},
+  }), { code: 'ERR_RELEASE_VISIBILITY' });
+});
+
+test('bounds each visibility request timeout to the remaining budget', async t => {
+  let now = 0;
+  t.mock.method(Date, 'now', () => now);
+  let published = false;
+  let first = true;
+  await assert.rejects(release.publishArtifacts(entries, '/tmp/dist', {
+    lookup: async (_, options) => {
+      if (!published) return null;
+      if (first) {
+        first = false;
+        now = 294000;
+      } else {
+        assert.equal(options.timeoutMs, 1000);
+        now += 1000;
+      }
+      return null;
+    },
+    publish: async () => { published = true; },
+    wait: async ms => { now += ms; },
+  }), { code: 'ERR_RELEASE_VISIBILITY' });
+});
