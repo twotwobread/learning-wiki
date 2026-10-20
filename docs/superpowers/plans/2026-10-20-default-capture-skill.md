@@ -42,8 +42,8 @@
 
 **Interfaces:** `huhPrompt.Agents` returns the selected agent IDs; nil remains the explicit no-skill result.
 
-- [ ] **Step 1: Write failing test.** Add a focused test for the initial Huh selection through the form's behavior, or a small pure default-selection helper if terminal input cannot be driven reliably. Keep a scripted prompt test showing explicit empty selection remains empty and confirmation cancellation writes nothing. Change the package smoke to omit `--agents` and check all three skill files.
-- [ ] **Step 2: Verify red.** Run `mise exec -- go test ./internal/cli -run 'TestWizard(Default|Deselection)' -count=1` and `mise exec -- npm run test:package` against a freshly built package; expect the default-selection or package assertion to fail.
-- [ ] **Step 3: Implement.** Initialize Huh's selected values to both agent IDs. Clarify the selection and final confirmation text. Document default install, `--no-skill`, Codex discovery/restart, and 0.2.0's explicit `--agents` requirement.
-- [ ] **Step 4: Verify green.** Run `mise exec -- go test ./...`, `mise exec -- go test -race ./...`, `mise exec -- npm test`, `mise exec -- npm run pack:local`, and `mise exec -- npm run test:package`; inspect `git diff --check`.
-- [ ] **Step 5: Commit.** Commit the wizard, package smoke, and docs after verification.
+- [x] **Step 1: Write failing test.** Add a focused test for the initial Huh selection through the form's behavior, or a small pure default-selection helper if terminal input cannot be driven reliably. Keep a scripted prompt test showing explicit empty selection remains empty and confirmation cancellation writes nothing. Change the package smoke to omit `--agents` and check all three skill files.
+- [x] **Step 2: Verify red.** Run `mise exec -- go test ./internal/cli -run 'TestWizard(Default|Deselection)' -count=1` and `mise exec -- npm run test:package` against a freshly built package; expect the default-selection or package assertion to fail.
+- [x] **Step 3: Implement.** Initialize Huh's selected values to both agent IDs. Clarify the selection and final confirmation text. Document default install, `--no-skill`, Codex discovery/restart, and 0.2.0's explicit `--agents` requirement.
+- [x] **Step 4: Verify green.** Run `mise exec -- go test ./...`, `mise exec -- go test -race ./...`, `mise exec -- npm test`, `mise exec -- npm run pack:local`, and `mise exec -- npm run test:package`; inspect `git diff --check`.
+- [x] **Step 5: Commit.** Commit the wizard, package smoke, and docs after verification.
