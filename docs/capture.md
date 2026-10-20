@@ -18,6 +18,8 @@ mise exec -- go run ./cmd/learning-wiki init \
   --agents pi,codex
 ```
 
+위 Windows 드라이브 경로 예시는 WSL에서 사용합니다. macOS에서는 `--vault "$HOME/Documents/LearningWiki"`처럼 로컬 절대 경로를 지정합니다.
+
 기존 Vault 연결에도 재실행 가능. 없는 Vault 생성은 `--create` 추가.
 
 ## 설치 파일
@@ -38,7 +40,7 @@ mise exec -- go run ./cmd/learning-wiki init \
 - 다른 PC에서는 init 재실행 필요. 공유 드라이브에 스킬의 기기별 binding을 복사하지 않기
 - 기존 내용과 동일하면 유지. 다르면 충돌 오류로 중단, 자동 덮어쓰기·업데이트 없음
 - 사용자 수정 템플릿도 재설치 시 충돌로 보존. 변경본 백업·비교 후 사용자가 정리
-- `.agents` 등 설치 경로의 심볼릭 링크는 현재 미지원
+- 관리 대상 내부의 `.agents` 등 설치 경로 심볼릭 링크는 미지원. 관리 대상 바깥의 시스템 경로 별칭은 허용
 - I/O 실패 시 이번 호출에서 생성한 리소스 파일 정리. 이미 준비한 Vault·설정 및 빈 설치 디렉터리는 남을 수 있음
 - 동시 설치·악의적인 동시 파일 시스템 변경에 대한 보안 격리는 보장하지 않음
 
@@ -88,7 +90,7 @@ Codex: `learning-capture` 스킬로 이번 학습 내용을 저장해 달라고 
 - Node: 내용 보존·출력 경로·기존 파일 비덮어쓰기·템플릿 조회·입력 오류·설정 누락·sessions 심볼릭 링크 거부
 - PTY: 에이전트 선택 후 최종 동의 및 설치
 - 임시 HOME/Vault에서 바이너리 설치 후 다른 cwd에서 보조 스크립트 실행 검증
-- 실제 pi/Codex의 스킬 발견·모델의 노트 품질·Windows Vault 연동은 사용자 환경에서 추가 검증 필요
+- 실제 pi/Codex의 스킬 발견·모델의 노트 품질·Windows/macOS Obsidian 연동은 사용자 환경에서 추가 검증 필요
 
 ```bash
 mise exec -- go test ./...

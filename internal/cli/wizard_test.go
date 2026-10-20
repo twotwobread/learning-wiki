@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/twotwobread/learning-wiki/internal/config"
+	"github.com/twotwobread/learning-wiki/internal/hostpath"
 )
 
 type scriptedPrompt struct {
@@ -17,6 +18,20 @@ type scriptedPrompt struct {
 	err           error
 	confirmations int
 	agents        []string
+}
+
+func TestWizardUsesSelectedPathResolver(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "vault")
+	resolver := hostpath.WSL(func(_ context.Context, input string) (string, error) {
+		if input != `D:\Notes\Vault` {
+			t.Fatalf("unexpected input: %q", input)
+		}
+		return root, nil
+	})
+	plan, err := planWizardWithResolver(context.Background(), &scriptedPrompt{path: `D:\Notes\Vault`, answers: []bool{true, true}}, filepath.Join(t.TempDir(), "config.json"), resolver)
+	if err != nil || plan.Path != root || !plan.Create {
+		t.Fatalf("unexpected plan: %+v %v", plan, err)
+	}
 }
 
 func (p *scriptedPrompt) Path(context.Context) (string, error)     { return p.path, p.err }

@@ -1,46 +1,12 @@
 package vault
 
 import (
-	"context"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
 )
-
-func TestResolve(t *testing.T) {
-	for _, input := range []string{"", "relative/path", `D:notes`, `\\server\share`} {
-		_, err := Resolve(context.Background(), input, nil)
-		if !errors.Is(err, ErrInvalidPath) {
-			t.Fatalf("%q: expected invalid path, got %v", input, err)
-		}
-	}
-	want := filepath.Join(t.TempDir(), "한글 notes")
-	got, err := Resolve(context.Background(), want, nil)
-	if err != nil || got != want {
-		t.Fatalf("got %q, %v", got, err)
-	}
-	input := `D:\내 문서\notes;echo bad`
-	got, err = Resolve(context.Background(), input, func(_ context.Context, value string) (string, error) {
-		if value != input {
-			t.Fatalf("input changed: %q", value)
-		}
-		return want + "\n", nil
-	})
-	if err != nil || got != want {
-		t.Fatalf("got %q, %v", got, err)
-	}
-	cause := errors.New("converter unavailable")
-	_, err = Resolve(context.Background(), input, func(context.Context, string) (string, error) { return "", cause })
-	if !errors.Is(err, cause) {
-		t.Fatalf("lost conversion cause: %v", err)
-	}
-	_, err = Resolve(context.Background(), input, func(context.Context, string) (string, error) { return "", nil })
-	if !errors.Is(err, ErrInvalidPath) {
-		t.Fatalf("empty conversion accepted: %v", err)
-	}
-}
 
 func TestPreparePreservesDataAndIsRepeatable(t *testing.T) {
 	root := t.TempDir()

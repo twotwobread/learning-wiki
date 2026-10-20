@@ -3,15 +3,15 @@
 
 const { spawn } = require('node:child_process');
 const { constants } = require('node:os');
+const targets = require('./targets.json');
 
 function resolveBinary(platform = process.platform, arch = process.arch, resolve = require.resolve) {
-  if (platform !== 'linux' || arch !== 'x64') {
-    throw Object.assign(new Error(`Unsupported platform ${platform}/${arch}. Run inside WSL Linux x64, not Windows PowerShell.`), { code: 'UNSUPPORTED_PLATFORM' });
-  }
+  const target = targets[`${platform}-${arch}`];
+  if (!target) throw Object.assign(new Error(`Unsupported platform ${platform}/${arch}.`), { code: 'UNSUPPORTED_PLATFORM' });
   try {
-    return resolve('@suyoung9137/learning-wiki-linux-x64/bin/learning-wiki');
+    return resolve(`${target.package}/bin/${target.executable}`);
   } catch (cause) {
-    throw Object.assign(new Error('Linux x64 binary package is missing. Reinstall with optional dependencies enabled (--include=optional).', { cause }), { code: 'MISSING_BINARY_PACKAGE' });
+    throw Object.assign(new Error(`Binary package ${target.package} is missing. Reinstall with optional dependencies enabled (--include=optional).`, { cause }), { code: 'MISSING_BINARY_PACKAGE' });
   }
 }
 

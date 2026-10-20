@@ -2,53 +2,20 @@
 package vault
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io/fs"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
+
+	"github.com/twotwobread/learning-wiki/internal/hostpath"
 )
 
 var (
-	ErrInvalidPath  = errors.New("expected an absolute Windows drive or Linux path")
+	ErrInvalidPath  = hostpath.ErrInvalidPath
 	ErrNotDirectory = errors.New("path is not a directory")
 	ErrSymlink      = errors.New("managed directory must not be a symbolic link")
 )
-
-type Converter func(context.Context, string) (string, error)
-
-// WSLPath passes the path as one argument, never through a shell.
-func WSLPath(ctx context.Context, path string) (string, error) {
-	output, err := exec.CommandContext(ctx, "wslpath", "-u", path).Output()
-	if err != nil {
-		return "", fmt.Errorf("convert Windows path: %w", err)
-	}
-	return string(output), nil
-}
-
-func Resolve(ctx context.Context, input string, convert Converter) (string, error) {
-	if strings.TrimSpace(input) == "" || strings.ContainsAny(input, "\x00\r\n") || strings.HasPrefix(input, "//") || strings.HasPrefix(input, `\\`) {
-		return "", ErrInvalidPath
-	}
-	windows := len(input) >= 3 && ((input[0] >= 'A' && input[0] <= 'Z') || (input[0] >= 'a' && input[0] <= 'z')) && input[1] == ':' && (input[2] == '\\' || input[2] == '/')
-	if windows {
-		if convert == nil {
-			convert = WSLPath
-		}
-		output, err := convert(ctx, input)
-		if err != nil {
-			return "", err
-		}
-		input = strings.TrimSuffix(strings.TrimSuffix(output, "\n"), "\r")
-	}
-	if !filepath.IsAbs(input) || strings.ContainsAny(input, "\x00\r\n") {
-		return "", ErrInvalidPath
-	}
-	return filepath.Clean(input), nil
-}
 
 func checkDir(path string, rejectSymlink bool) error {
 	info, err := os.Lstat(path)

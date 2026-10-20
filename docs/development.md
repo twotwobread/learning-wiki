@@ -2,7 +2,7 @@
 
 ## 지원 환경 및 버전 관리
 
-WSL Linux x64에서 개발합니다. Go와 Node.js는 mise로 관리하며 프로젝트 루트의 `mise.toml`에 패치 버전까지 고정합니다.
+WSL Linux x64와 macOS arm64에서 개발합니다. Go와 Node.js는 mise로 관리하며 프로젝트 루트의 `mise.toml`에 패치 버전까지 고정합니다.
 
 - Go: 1.27.2
 - Node.js: 22.23.3 (기존 환경과 동일한 버전으로 시작)
@@ -14,12 +14,16 @@ mise는 개발 환경용입니다. 배포된 npm 패키지의 최종 사용자�
 
 공식 설치 안내: https://mise.jdx.dev/getting-started.html
 
-mise를 설치하고 Bash 설정에 다음을 추가합니다. 기본 사용자 설치 위치 기준입니다.
+mise를 설치하고 사용하는 셸에 맞게 활성화합니다. 다음은 Bash와 zsh 예시입니다.
 
 ```bash
 if [ -x "$HOME/.local/bin/mise" ]; then
     eval "$("$HOME/.local/bin/mise" activate bash)"
 fi
+```
+
+```zsh
+eval "$(mise activate zsh)"
 ```
 
 `~/.local/bin`이 PATH에 있어야 합니다. 새 터미널을 열고 저장소에서 설정을 검토한 뒤 실행합니다.
@@ -64,10 +68,11 @@ mise exec -- go build -o bin/learning-wiki ./cmd/learning-wiki
 - `--vault` 지정 시 기존 비대화형 흐름 유지. `--create` 단독 사용·빈 `--vault`는 입력 오류
 - `init --vault <절대 경로>`: 기존 로컬 Vault 연결 및 `sessions/`, `templates/` 준비
 - `--create`: 없는 Vault 및 부모 디렉터리 생성 허용
-- Windows 드라이브 절대 경로는 `wslpath -u`로 변환. WSL 절대 경로도 지원
-- 상대 경로·UNC 경로 미지원. Linux 경로가 실제 Windows 마운트인지는 아직 강제하지 않음
+- WSL에서 Windows 드라이브 절대 경로는 `wslpath -u`로 변환. WSL 절대 경로도 지원
+- macOS와 일반 Linux에서는 로컬 절대 경로 사용. Windows 드라이브 입력은 거부
+- 상대 경로·UNC 경로 미지원. WSL 경로가 실제 Windows 마운트인지는 강제하지 않음
 - 관리 하위 디렉터리의 심볼릭 링크는 거부. 동시 외부 변경에 대한 보안 격리 보장은 아님
-- 기기별 설정: `$XDG_CONFIG_HOME/learning-wiki/config.json` (미설정 시 `~/.config/learning-wiki/config.json`)
+- 기기별 설정: Linux는 `$XDG_CONFIG_HOME/learning-wiki/config.json` (미설정 시 `~/.config/learning-wiki/config.json`), macOS는 `~/Library/Application Support/learning-wiki/config.json`
 - 같은 Vault 재연결 허용. 다른 Vault로의 설정 덮어쓰기 및 손상된 설정 교체는 거부
 - 학습 노트 템플릿은 기본 설치. `--agents pi,codex`로 공통 수집 스킬 설치
 - pi/Codex 공유 경로 `~/.agents/skills/` 사용. 미선택 에이전트에서도 보일 수 있음
@@ -83,14 +88,16 @@ mise exec -- go run ./cmd/learning-wiki init
 mise exec -- go run ./cmd/learning-wiki init --vault 'D:\Notes\LearningWiki'
 # 없는 폴더 생성 허용
 mise exec -- go run ./cmd/learning-wiki init --vault /mnt/d/Notes/LearningWiki --create
+# macOS arm64의 로컬 Vault
+mise exec -- go run ./cmd/learning-wiki init --vault "$HOME/Documents/LearningWiki" --create
 ```
 
-검사 실패 시 새로 생성한 빈 Vault 디렉터리는 정리. 기존 데이터는 보존. Vault 준비 이후 설정 저장에 실패하면 준비된 디렉터리는 유지하고 오류 반환; 재실행 가능. 설정 저장은 WSL 로컬 파일 시스템의 hard link 기반 no-replace 방식 사용. 동시 초기 설정 실행은 지원 대상으로 보장하지 않음.
+검사 실패 시 새로 생성한 빈 Vault 디렉터리는 정리. 기존 데이터는 보존. Vault 준비 이후 설정 저장에 실패하면 준비된 디렉터리는 유지하고 오류 반환; 재실행 가능. 설정 저장은 같은 디렉터리의 hard link 기반 no-replace 방식 사용. 동시 초기 설정 실행은 지원 대상으로 보장하지 않음.
 
 빌드 버전 주입:
 
 ```bash
-mise exec -- go build -ldflags '-X main.version=0.1.0' -o bin/learning-wiki ./cmd/learning-wiki
+mise exec -- go build -ldflags '-X main.version=0.2.0' -o bin/learning-wiki ./cmd/learning-wiki
 ```
 
 검증:
@@ -105,7 +112,7 @@ mise exec -- npm run test:package
 CGO_ENABLED=1 mise exec -- go test -race ./...
 ```
 
-## 현재 환경 검증
+## 이전 WSL 환경 검증
 
 - 공식 mise 설치 스크립트를 검토하고 체크섬 검증을 거쳐 설치.
 - mise로 Go와 Node 설치 및 버전 확인 완료.
@@ -115,6 +122,6 @@ CGO_ENABLED=1 mise exec -- go test -race ./...
 - CLI 테스트·`go vet`·Linux 바이너리 빌드 및 종료 코드 검증 통과.
 - 현재 환경에 C 컴파일러가 없어 race 검사는 미실행. 일반 테스트 통과와 구분.
 
-## 다음 작업
+## 추가 검증 범위
 
-별도 WSL 환경 설치 검증 및 source 품질 개선. 로컬 tarball 설치·npx 실행과 CI 테스트·패키징 검증 완료. npm 공개 배포 승인 및 MIT 라이선스 적용. 원본 학습 자료 품질에 집중하며 플러그인 생성 결과 튜닝은 범위 밖. 현재 단위 테스트는 임시 Linux 디렉터리와 경로 변환 대역 사용. 마법사는 PTY에서 경로 입력·생성 동의·에이전트 선택·최종 확인·완료 검증. Ctrl+C 취소(130)는 이전 단계에서 검증. 실제 pi 스킬 수집과 사용자의 수동 설치 플러그인 ingest 결과는 확인. Codex 세션 수집, 자동 설치한 플러그인의 Windows 활성화, 새 마법사의 Windows 터미널 렌더링은 별도 검증 필요.
+로컬 테스트는 임시 Vault·HOME에서 파일 설치와 재실행을 확인합니다. 실제 WSL/Windows 및 Mac Obsidian 앱에서의 플러그인 활성화·ingest, Codex 세션 수집 품질, 클라우드 동기화는 별도 검증 대상으로 기록합니다. npm `0.2.0` 공개 배포는 이 변경에 포함하지 않습니다.

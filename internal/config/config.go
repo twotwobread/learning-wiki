@@ -76,7 +76,7 @@ func Save(path, vaultPath string) (err error) {
 	if err = errors.Join(encodeErr, f.Close()); err != nil {
 		return err
 	}
-	// A same-directory hard link is an atomic no-replace publication on the WSL filesystem.
+	// A same-directory hard link publishes the file without replacing an existing binding.
 	if err = os.Link(f.Name(), path); errors.Is(err, fs.ErrExist) {
 		return Check(path, vaultPath)
 	}

@@ -7,7 +7,7 @@ import (
 	"io"
 
 	"github.com/spf13/cobra"
-	"github.com/twotwobread/learning-wiki/internal/vault"
+	"github.com/twotwobread/learning-wiki/internal/hostpath"
 )
 
 // ErrInvalidArguments identifies invalid command-line input independently of wording.
@@ -15,13 +15,17 @@ var ErrInvalidArguments = errors.New("invalid command-line arguments")
 
 // NewRootCommand returns an independent command tree for each invocation.
 func NewRootCommand(version string) *cobra.Command {
+	return newRootCommandWithResolver(version, hostpath.ForCurrentHost())
+}
+
+func newRootCommandWithResolver(version string, resolver hostpath.Resolver) *cobra.Command {
 	if version == "" {
 		version = "dev"
 	}
 	cmd := &cobra.Command{
 		Use:           "learning-wiki",
 		Short:         "Collect learning from pi and Codex into a local Obsidian vault",
-		Long:          "Learning Wiki connects WSL-based pi and Codex workflows to a local Obsidian vault. Use init to connect a local vault.",
+		Long:          "Learning Wiki connects pi and Codex workflows to a local Obsidian vault. Use init to connect a local vault.",
 		Version:       version,
 		SilenceErrors: true,
 		SilenceUsage:  true,
@@ -36,7 +40,7 @@ func NewRootCommand(version string) *cobra.Command {
 	cmd.SetFlagErrorFunc(func(cmd *cobra.Command, err error) error {
 		return fmt.Errorf("%w: %w", ErrInvalidArguments, err)
 	})
-	cmd.AddCommand(newInitCommand())
+	cmd.AddCommand(newInitCommandWithResolver(nil, resolver))
 	cmd.CompletionOptions.DisableDefaultCmd = true
 	return cmd
 }
@@ -54,7 +58,7 @@ func Run(args []string, version string, stdout, stderr io.Writer) int {
 		if errors.Is(err, ErrCancelled) {
 			return 130
 		}
-		if errors.Is(err, ErrInvalidArguments) || errors.Is(err, vault.ErrInvalidPath) {
+		if errors.Is(err, ErrInvalidArguments) || errors.Is(err, hostpath.ErrInvalidPath) {
 			return 2
 		}
 		return 1

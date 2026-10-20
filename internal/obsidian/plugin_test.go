@@ -118,3 +118,36 @@ func TestRejectIncompleteOrSymlinkedInstallation(t *testing.T) {
 		})
 	}
 }
+
+func TestPrepareAllowsSymlinkOutsideVault(t *testing.T) {
+	parent := t.TempDir()
+	real := filepath.Join(parent, "real")
+	if err := os.Mkdir(real, 0755); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(parent, "alias")
+	if err := os.Symlink(real, alias); err != nil {
+		t.Fatal(err)
+	}
+	root := filepath.Join(alias, "vault")
+	release, bodies := fixtureRelease()
+	result, err := Prepare(context.Background(), root, release, func(_ context.Context, a Asset) ([]byte, error) { return bodies[a.Name], nil })
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := resources.Install(result.Files); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, ".obsidian", "plugins", PluginID, "manifest.json")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestPrepareAcceptsTrailingSeparatorInVaultPath(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "vault") + string(filepath.Separator)
+	release, bodies := fixtureRelease()
+	result, err := Prepare(context.Background(), root, release, func(_ context.Context, a Asset) ([]byte, error) { return bodies[a.Name], nil })
+	if err != nil || len(result.Files) != len(release.Assets) {
+		t.Fatalf("unexpected result: %+v %v", result, err)
+	}
+}

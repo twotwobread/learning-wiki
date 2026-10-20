@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 //go:embed assets/*
@@ -17,6 +18,7 @@ var ErrConflict = errors.New("resource conflicts with an existing file or symlin
 var ErrInvalidAgent = errors.New("supported agents: pi, codex")
 
 type File struct {
+	Root    string
 	Path    string
 	Content []byte
 }
@@ -33,11 +35,13 @@ func Plan(home, root, configPath string, agents []string) ([]File, error) {
 	if err := ValidateAgents(agents); err != nil {
 		return nil, err
 	}
+	home = filepath.Clean(home)
+	root = filepath.Clean(root)
 	template, err := assets.ReadFile("assets/learning-note.md")
 	if err != nil {
 		return nil, err
 	}
-	files := []File{{filepath.Join(root, "templates", "learning-note.md"), template}}
+	files := []File{{Root: root, Path: filepath.Join(root, "templates", "learning-note.md"), Content: template}}
 	if len(agents) == 0 {
 		return files, nil
 	}
@@ -47,7 +51,7 @@ func Plan(home, root, configPath string, agents []string) ([]File, error) {
 		if err != nil {
 			return nil, err
 		}
-		files = append(files, File{filepath.Join(skill, entry.dest), data})
+		files = append(files, File{Root: home, Path: filepath.Join(skill, entry.dest), Content: data})
 	}
 	data, err := json.MarshalIndent(struct {
 		ConfigPath string `json:"config_path"`
@@ -55,26 +59,28 @@ func Plan(home, root, configPath string, agents []string) ([]File, error) {
 	if err != nil {
 		return nil, err
 	}
-	files = append(files, File{filepath.Join(skill, "binding.json"), append(data, '\n')})
+	files = append(files, File{Root: home, Path: filepath.Join(skill, "binding.json"), Content: append(data, '\n')})
 	return files, nil
 }
 
 // Check runs without creating any files or directories.
 func Check(files []File) error {
 	for _, f := range files {
-		if !filepath.IsAbs(f.Path) {
+		if !filepath.IsAbs(f.Path) || !filepath.IsAbs(f.Root) {
 			return fmt.Errorf("resource path must be absolute: %s", f.Path)
 		}
-		for p := filepath.Dir(f.Path); ; p = filepath.Dir(p) {
+		managedRoot := filepath.Clean(f.Root)
+		rel, err := filepath.Rel(managedRoot, f.Path)
+		if err != nil || rel == "." || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+			return fmt.Errorf("%w: resource path outside managed root: %s", ErrConflict, f.Path)
+		}
+		for p := filepath.Dir(f.Path); p != managedRoot; p = filepath.Dir(p) {
 			info, err := os.Lstat(p)
 			if err == nil && !info.IsDir() {
 				return fmt.Errorf("%w: %s", ErrConflict, p)
 			}
 			if err != nil && !errors.Is(err, os.ErrNotExist) {
 				return err
-			}
-			if filepath.Dir(p) == p {
-				break
 			}
 		}
 		info, err := os.Lstat(f.Path)

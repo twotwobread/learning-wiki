@@ -6,14 +6,17 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/twotwobread/learning-wiki/internal/config"
+	"github.com/twotwobread/learning-wiki/internal/hostpath"
 	"github.com/twotwobread/learning-wiki/internal/obsidian"
 	"github.com/twotwobread/learning-wiki/internal/resources"
 	"github.com/twotwobread/learning-wiki/internal/vault"
 )
 
-func newInitCommand() *cobra.Command { return newInitCommandWithFetcher(nil) }
-
 func newInitCommandWithFetcher(fetch obsidian.Fetcher) *cobra.Command {
+	return newInitCommandWithResolver(fetch, hostpath.ForCurrentHost())
+}
+
+func newInitCommandWithResolver(fetch obsidian.Fetcher, resolver hostpath.Resolver) *cobra.Command {
 	var plugin bool
 	var path string
 	var create bool
@@ -43,13 +46,13 @@ func newInitCommandWithFetcher(fetch obsidian.Fetcher) *cobra.Command {
 			}
 			var resolved string
 			if path == "" {
-				plan, err := planWizard(cmd.Context(), huhPrompt{in: cmd.InOrStdin(), out: cmd.OutOrStdout()}, configPath)
+				plan, err := planWizardWithResolver(cmd.Context(), huhPrompt{in: cmd.InOrStdin(), out: cmd.OutOrStdout()}, configPath, resolver)
 				if err != nil {
 					return err
 				}
 				resolved, create, agents, plugin = plan.Path, plan.Create, plan.Agents, plan.Plugin
 			} else {
-				resolved, err = vault.Resolve(cmd.Context(), path, nil)
+				resolved, err = resolver.Resolve(cmd.Context(), path)
 				if err != nil {
 					return err
 				}
@@ -106,11 +109,11 @@ func newInitCommandWithFetcher(fetch obsidian.Fetcher) *cobra.Command {
 					return err
 				}
 			}
-			_, err = fmt.Fprintln(cmd.OutOrStdout(), "Open this folder in Windows Obsidian. If installing plugin files, close/reopen Obsidian, review community-plugin trust, enable Karpathy LLM Wiki, then configure your provider there. No credentials or activation settings were changed.")
+			_, err = fmt.Fprintln(cmd.OutOrStdout(), "Open this vault in Obsidian. If installing plugin files, close/reopen Obsidian, review community-plugin trust, enable Karpathy LLM Wiki, then configure your provider there. No credentials or activation settings were changed.")
 			return err
 		},
 	}
-	cmd.Flags().StringVar(&path, "vault", "", "Windows drive or WSL absolute path to the local vault")
+	cmd.Flags().StringVar(&path, "vault", "", "Absolute path to the local vault (WSL also accepts Windows drive paths)")
 	cmd.Flags().BoolVar(&create, "create", false, "Allow creation of a missing vault directory")
 	cmd.Flags().StringSliceVar(&agents, "agents", nil, "Install shared capture skill for pi,codex (visible to both); omit to install template only")
 	cmd.Flags().BoolVar(&plugin, "plugin", false, "Consent to download Karpathy LLM Wiki 1.28.0 from GitHub (Apache-2.0); requires Obsidian >= 1.11.4; preserve existing installs")

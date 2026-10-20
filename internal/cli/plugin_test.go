@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/twotwobread/learning-wiki/internal/config"
 	"github.com/twotwobread/learning-wiki/internal/obsidian"
 )
 
@@ -36,6 +37,10 @@ func TestPluginDownloadFailureDoesNotInitialize(t *testing.T) {
 	t.Setenv("HOME", home)
 	t.Setenv("XDG_CONFIG_HOME", filepath.Join(home, "config"))
 	root := filepath.Join(t.TempDir(), "vault")
+	configPath, err := config.Path()
+	if err != nil {
+		t.Fatal(err)
+	}
 	cause := errors.New("offline")
 	cmd := newInitCommandWithFetcher(func(context.Context, obsidian.Asset) ([]byte, error) { return nil, cause })
 	cmd.SetArgs([]string{"--vault", root, "--create", "--plugin"})
@@ -44,7 +49,7 @@ func TestPluginDownloadFailureDoesNotInitialize(t *testing.T) {
 	if err := cmd.Execute(); !errors.Is(err, cause) {
 		t.Fatalf("lost download error: %v", err)
 	}
-	for _, p := range []string{root, filepath.Join(home, "config/learning-wiki/config.json")} {
+	for _, p := range []string{root, configPath} {
 		if _, err := os.Stat(p); !os.IsNotExist(err) {
 			t.Fatalf("side effect before successful download: %s", p)
 		}

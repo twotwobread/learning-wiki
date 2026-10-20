@@ -8,7 +8,7 @@ description: Save learning from the current pi or Codex conversation as a source
 ## 실행 조건
 
 - 사용자의 명시적 저장 요청에만 실행
-- Node.js 필요. 명령은 WSL에서 실행
+- Node.js 필요. 설치한 pi/Codex와 같은 사용자 환경에서 실행
 - 이 스킬 디렉터리 기준 `scripts/capture.mjs` 사용. 현재 프로젝트 경로를 기준으로 스크립트 탐색 금지
 - 스킬 옆 `binding.json`은 기기별 설정 파일 위치만 지정. Vault 경로 하드코딩 금지
 
