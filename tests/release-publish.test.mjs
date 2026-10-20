@@ -139,3 +139,18 @@ test('bounds each visibility request timeout to the remaining budget', async t =
     wait: async ms => { now += ms; },
   }), { code: 'ERR_RELEASE_VISIBILITY' });
 });
+
+test('final registry check detects earlier platform integrity changing after main publication', async () => {
+  const registry = new Map();
+  const published = [];
+  await assert.rejects(release.publishArtifacts(entries, '/tmp/dist', {
+    lookup: async entry => registry.get(entry.name) ?? null,
+    publish: async (_, entry) => {
+      published.push(entry.name);
+      registry.set(entry.name, metadata(entry));
+      if (entry === entries[1]) registry.set(entries[0].name, { dist: { integrity: 'changed' } });
+    },
+    wait: async () => {},
+  }), { code: 'ERR_RELEASE_INTEGRITY' });
+  assert.deepEqual(published, entries.map(entry => entry.name));
+});

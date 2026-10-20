@@ -106,6 +106,7 @@ export async function publishArtifacts(entries, dir, { lookup, publish, wait }) 
       waited += delay;
     }
   }
+  for (const entry of entries) checkIntegrity(entry, await lookup(entry));
 }
 
 async function publishRelease(dir, version) {
