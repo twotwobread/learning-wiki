@@ -11,6 +11,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/twotwobread/learning-wiki/internal/config"
+	"github.com/twotwobread/learning-wiki/internal/hostpath"
 	"github.com/twotwobread/learning-wiki/internal/obsidian"
 	"github.com/twotwobread/learning-wiki/internal/resources"
 	"github.com/twotwobread/learning-wiki/internal/vault"
@@ -34,11 +35,15 @@ type setupPrompt interface {
 
 // planWizard collects consent without modifying the vault or configuration.
 func planWizard(ctx context.Context, p setupPrompt, configPath string) (setupPlan, error) {
+	return planWizardWithResolver(ctx, p, configPath, hostpath.ForCurrentHost())
+}
+
+func planWizardWithResolver(ctx context.Context, p setupPrompt, configPath string, resolver hostpath.Resolver) (setupPlan, error) {
 	input, err := p.Path(ctx)
 	if err != nil {
 		return setupPlan{}, err
 	}
-	resolved, err := vault.Resolve(ctx, input, nil)
+	resolved, err := resolver.Resolve(ctx, input)
 	if err != nil {
 		return setupPlan{}, err
 	}
@@ -96,7 +101,7 @@ func (p huhPrompt) run(ctx context.Context, field huh.Field) error {
 }
 func (p huhPrompt) Path(ctx context.Context) (string, error) {
 	var value string
-	err := p.run(ctx, huh.NewInput().Title("Obsidian Vault 경로").Description(`Windows 절대 경로 또는 /mnt/... 경로 입력. 따옴표는 입력하지 마세요.`).Value(&value).Validate(func(s string) error {
+	err := p.run(ctx, huh.NewInput().Title("Obsidian Vault 경로").Description(`로컬 절대 경로를 입력하세요. WSL에서는 Windows 드라이브 경로도 사용할 수 있습니다. 따옴표는 입력하지 마세요.`).Value(&value).Validate(func(s string) error {
 		if strings.TrimSpace(s) == "" {
 			return vault.ErrInvalidPath
 		}

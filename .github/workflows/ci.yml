@@ -11,8 +11,16 @@ permissions:
 
 jobs:
   test-and-package:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            target: linux-x64
+          - runner: macos-15
+            target: darwin-arm64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - name: Install pinned toolchains
@@ -28,12 +36,13 @@ jobs:
           npm test
       - name: Build and validate local npm packages
         run: |
+          test "$(node -p 'process.platform + "-" + process.arch')" = '${{ matrix.target }}'
           npm run pack:local
           npm run test:package
       - name: Upload local package artifacts (no publishing)
         uses: actions/upload-artifact@v4
         with:
-          name: learning-wiki-linux-x64
+          name: learning-wiki-${{ matrix.target }}
           path: |
             dist/*.tgz
             dist/artifacts.json

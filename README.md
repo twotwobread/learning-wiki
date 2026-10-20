@@ -1,14 +1,14 @@
 # Learning Wiki
 
-WSL의 pi/Codex에서 얻은 학습 내용을 Windows Obsidian Vault에 저장하기 위한 설치 패키지.
+pi/Codex에서 얻은 학습 내용을 로컬 Obsidian Vault에 저장하기 위한 설치 패키지.
 
-> CLI·마법사, Vault 연결, 학습 자료 수집, 플러그인 설치 및 Linux x64 npm 패키징 지원. 자체 코드 MIT 라이선스.
+> CLI·마법사, Vault 연결, 학습 자료 수집, 플러그인 설치 및 Linux x64/macOS arm64 npm 패키징 지원. 자체 코드 MIT 라이선스.
 
 수집 스킬 설치·사용 방법: [학습 노트 수집](docs/capture.md).
 
 설치·로컬 패키징·배포: [npm 패키지](docs/npm.md).
 
-배포된 버전 실행 (WSL Linux x64, Node.js 22 이상):
+현재 레지스트리 배포 버전 실행 (WSL Linux x64, Node.js 22 이상):
 
 ```bash
 npx @suyoung9137/learning-wiki@0.1.0 init
@@ -16,22 +16,23 @@ npx @suyoung9137/learning-wiki@0.1.0 init
 
 레지스트리 제공 여부: `npm view @suyoung9137/learning-wiki version`.
 
+이 브랜치의 `0.2.0`은 macOS arm64용 패키지도 생성합니다. 레지스트리에 배포되기 전에는 [로컬 tarball 검증](docs/npm.md)으로 실행할 수 있습니다.
+
 ## 목표 흐름
 
-1. WSL에서 npm 패키지의 설치 마법사를 실행합니다.
-2. Windows 측 로컬 Vault 경로를 연결합니다.
+1. 지원 환경에서 npm 패키지의 설치 마법사를 실행합니다.
+2. 로컬 Vault 경로를 연결합니다.
 3. pi/Codex에서 수집 스킬을 호출해 학습 노트를 저장합니다.
-4. Windows Obsidian의 Karpathy LLM Wiki 플러그인으로 노트를 ingest합니다.
+4. Obsidian의 Karpathy LLM Wiki 플러그인으로 노트를 ingest합니다.
 5. 생성된 위키를 Obsidian에서 읽고 탐색합니다.
 
-## 첫 버전 지원 범위
+## 지원 환경
 
-- Windows x64 + WSL Linux x64.
-- Windows에서 Obsidian 실행, WSL에서 pi/Codex 및 설치 도구 실행.
-- WSL에서 읽고 쓸 수 있는 Windows 측 로컬 디렉터리 사용.
-- Windows 경로와 WSL 경로 입력 지원. Windows 경로는 `wslpath`로 변환 후 접근 검증.
+- WSL Linux x64: Windows에서 Obsidian 실행, WSL에서 pi/Codex 및 설치 도구 실행. WSL에서 접근 가능한 Windows 측 로컬 디렉터리 사용.
+- macOS arm64: Mac에서 Obsidian과 pi/Codex 실행. Mac의 로컬 Vault 절대 경로 사용.
+- WSL에서는 Windows 드라이브 경로를 `wslpath`로 변환. 일반 Linux와 macOS에서는 해당 환경의 절대 경로 사용.
 - Go 코어 + 얇은 Node.js 실행 래퍼.
-- npm 플랫폼 패키지는 우선 `linux/x64`만 지원. Windows 호스트여도 실행 바이너리는 Linux용.
+- npm 플랫폼 패키지는 `linux/x64`, `darwin/arm64`로 분리. Windows 호스트에서의 WSL 실행 바이너리는 Linux용.
 - Obsidian 및 에이전트는 사용자가 미리 설치. 플러그인 활성화와 모델 인증도 사용자가 수행.
 - 위키 갱신은 Obsidian 플러그인이 담당하며, 초기에는 수동 ingest.
 
@@ -61,7 +62,7 @@ Google Drive 등 동기화 제품은 의존성이 아닙니다. 설치 여부, �
 ## 저장 원칙
 
 - Vault: `sessions/`에 학습 노트, `templates/`에 템플릿, `wiki/`는 플러그인 관리 영역.
-- 기기별 절대 경로는 WSL 사용자 설정에 저장하고 공유 스킬에 하드코딩하지 않습니다.
+- 기기별 절대 경로는 해당 환경의 사용자 설정에 저장하고 공유 스킬에 하드코딩하지 않습니다.
 - 비밀키와 원문 세션 로그를 기본적으로 Vault에 저장하지 않습니다.
 - 설치 재실행으로 기존 문서나 설정을 덮어쓰지 않습니다.
 - 기존 `.obsidian` 파일 보존. 기존 플러그인은 덮어쓰거나 업데이트하지 않음. 불완전한 설치는 수동 검토 안내.
@@ -75,4 +76,4 @@ Google Drive 등 동기화 제품은 의존성이 아닙니다. 설치 여부, �
 
 개발 환경은 mise로 관리합니다. [개발 환경 설정](docs/development.md)을 참고하세요.
 
-Go module: `github.com/twotwobread/learning-wiki`. npm scope: `@suyoung9137`. 공개 패키지 2개와 private 개발용 루트 패키지로 구성. 라이선스: [MIT](LICENSE).
+Go module: `github.com/twotwobread/learning-wiki`. npm scope: `@suyoung9137`. 공개 패키지 3개와 private 개발용 루트 패키지로 구성. 라이선스: [MIT](LICENSE).

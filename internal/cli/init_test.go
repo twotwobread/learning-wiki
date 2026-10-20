@@ -2,12 +2,16 @@ package cli
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/twotwobread/learning-wiki/internal/config"
+	"github.com/twotwobread/learning-wiki/internal/hostpath"
 )
 
 func TestNonInteractiveInitRequiresPath(t *testing.T) {
@@ -20,9 +24,48 @@ func TestNonInteractiveInitRequiresPath(t *testing.T) {
 	}
 }
 
-func TestInitPersistsLocalConfigAndPreservesItOnConflict(t *testing.T) {
+func TestInitUsesSelectedPathResolver(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
 	configRoot := t.TempDir()
 	t.Setenv("XDG_CONFIG_HOME", configRoot)
+	configPath, err := config.Path()
+	if err != nil {
+		t.Fatal(err)
+	}
+	root := filepath.Join(t.TempDir(), "vault")
+	windows := `D:\Notes\Vault`
+	resolver := hostpath.WSL(func(_ context.Context, input string) (string, error) {
+		if input != windows {
+			t.Fatalf("unexpected path input: %q", input)
+		}
+		return root, nil
+	})
+	cmd := newRootCommandWithResolver("dev", resolver)
+	cmd.SetArgs([]string{"init", "--vault", windows, "--create"})
+	cmd.SetOut(&bytes.Buffer{})
+	if err := cmd.Execute(); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var saved struct {
+		VaultPath string `json:"vault_path"`
+	}
+	if err := json.Unmarshal(data, &saved); err != nil || saved.VaultPath != root {
+		t.Fatalf("wrong saved path: %+v %v", saved, err)
+	}
+}
+
+func TestInitPersistsLocalConfigAndPreservesItOnConflict(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	configRoot := t.TempDir()
+	t.Setenv("XDG_CONFIG_HOME", configRoot)
+	configPath, err := config.Path()
+	if err != nil {
+		t.Fatal(err)
+	}
 	root := filepath.Join(t.TempDir(), "한글 Vault")
 	var out, errOut bytes.Buffer
 	args := []string{"init", "--vault", root, "--create"}
@@ -31,7 +74,6 @@ func TestInitPersistsLocalConfigAndPreservesItOnConflict(t *testing.T) {
 			t.Fatalf("init failed: %d %s", code, &errOut)
 		}
 	}
-	configPath := filepath.Join(configRoot, "learning-wiki", "config.json")
 	before, err := os.ReadFile(configPath)
 	if err != nil {
 		t.Fatal(err)
@@ -59,6 +101,7 @@ func TestInitPersistsLocalConfigAndPreservesItOnConflict(t *testing.T) {
 }
 
 func TestInitInvalidPathAndMissingPath(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
 	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
 	var out, errOut bytes.Buffer
 	if code := Run([]string{"init", "--vault", "relative"}, "dev", &out, &errOut); code != 2 {

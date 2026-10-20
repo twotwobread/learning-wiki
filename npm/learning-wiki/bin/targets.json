@@ -1,0 +1,18 @@
+{
+  "linux-x64": {
+    "platform": "linux",
+    "arch": "x64",
+    "goos": "linux",
+    "goarch": "amd64",
+    "package": "@suyoung9137/learning-wiki-linux-x64",
+    "executable": "learning-wiki"
+  },
+  "darwin-arm64": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "goos": "darwin",
+    "goarch": "arm64",
+    "package": "@suyoung9137/learning-wiki-darwin-arm64",
+    "executable": "learning-wiki"
+  }
+}

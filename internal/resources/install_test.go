@@ -86,3 +86,41 @@ func TestRejectSymlinkParent(t *testing.T) {
 		t.Fatal("wrote through symlink")
 	}
 }
+
+func TestAllowsSymlinkOutsideManagedRoots(t *testing.T) {
+	parent := t.TempDir()
+	real := filepath.Join(parent, "real")
+	if err := os.Mkdir(real, 0755); err != nil {
+		t.Fatal(err)
+	}
+	alias := filepath.Join(parent, "alias")
+	if err := os.Symlink(real, alias); err != nil {
+		t.Fatal(err)
+	}
+	home := filepath.Join(alias, "home")
+	root := filepath.Join(alias, "vault")
+	files, err := Plan(home, root, "/config", []string{"codex"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Install(files); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "templates", "learning-note.md")); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestInstallAcceptsTrailingSeparatorInManagedRoot(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "vault") + string(filepath.Separator)
+	files, err := Plan(t.TempDir(), root, "/config", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := Install(files); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "templates", "learning-note.md")); err != nil {
+		t.Fatal(err)
+	}
+}

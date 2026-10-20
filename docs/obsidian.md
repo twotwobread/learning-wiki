@@ -8,7 +8,7 @@
 
 ## 사용
 
-Windows에서 Obsidian을 먼저 설치. 기본 설정 폴더 `.obsidian` 사용을 전제로 하며 커스텀 설정 폴더는 미지원.
+Windows 또는 macOS에서 Obsidian을 먼저 설치. 기본 설정 폴더 `.obsidian` 사용을 전제로 하며 커스텀 설정 폴더는 미지원. WSL에서는 Windows Obsidian과 같은 Vault에 접근해야 합니다.
 
 마법사:
 
@@ -26,6 +26,8 @@ mise exec -- go run ./cmd/learning-wiki init \
   --agents pi,codex \
   --plugin
 ```
+
+macOS에서는 `--vault "$HOME/Documents/LearningWiki"`처럼 로컬 절대 경로를 사용합니다.
 
 `--plugin` 자체가 다운로드·파일 설치 동의. 생략 시 플러그인 관련 네트워크 요청·파일 변경 없음. 없는 Vault 생성은 `--create` 추가.
 
@@ -60,7 +62,7 @@ mise exec -- go run ./cmd/learning-wiki init \
 
 ## 사용자 완료 단계
 
-1. Windows Obsidian에서 Vault 열기 / 재시작
+1. 설치한 OS의 Obsidian에서 Vault 열기 / 재시작
 2. 커뮤니티 플러그인 신뢰 안내 확인
 3. 설치된 Karpathy LLM Wiki 활성화
 4. 플러그인 내부에서 모델 로그인 또는 API 설정 (CLI에 키 전달 금지)
@@ -72,5 +74,5 @@ mise exec -- go run ./cmd/learning-wiki init \
 - 단위 테스트: 동의 없는 다운로드 방지, checksum/manifest 실패 의미, 기존 설치·설정 보존, 불완전 설치·symlink 거부
 - 임시 Vault: 실제 공식 릴리스 다운로드·고정 해시 검증·파일 설치·재실행 보존 확인
 - PTY: 플러그인 건너뛰기 후 Obsidian 설정 변경 없이 init 완료 확인
-- 실제 Windows에서 자동 설치본을 활성화하는 흐름은 별도 검증 필요
+- 실제 Windows 및 macOS Obsidian에서 자동 설치본을 활성화하는 흐름은 별도 검증 필요
 - 현재 사용자 Vault는 설치 테스트 대상으로 사용하지 않음

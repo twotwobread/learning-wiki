@@ -99,17 +99,15 @@ func Prepare(ctx context.Context, root string, release Release, fetch Fetcher) (
 	if !filepath.IsAbs(root) {
 		return Result{}, errors.New("vault path must be absolute")
 	}
+	root = filepath.Clean(root)
 	dest := filepath.Join(root, ".obsidian", "plugins", PluginID)
-	for p := dest; ; p = filepath.Dir(p) {
+	for p := dest; p != root; p = filepath.Dir(p) {
 		info, err := os.Lstat(p)
 		if err == nil && !info.IsDir() {
 			return Result{}, fmt.Errorf("%w: %s", ErrExisting, p)
 		}
 		if err != nil && !errors.Is(err, os.ErrNotExist) {
 			return Result{}, err
-		}
-		if filepath.Dir(p) == p {
-			break
 		}
 	}
 	if _, err := os.Lstat(dest); err == nil {
@@ -155,7 +153,7 @@ func Prepare(ctx context.Context, root string, release Release, fetch Fetcher) (
 				return Result{}, ErrManifest
 			}
 		}
-		result.Files = append(result.Files, resources.File{Path: filepath.Join(dest, a.Name), Content: data})
+		result.Files = append(result.Files, resources.File{Root: root, Path: filepath.Join(dest, a.Name), Content: data})
 	}
 	for _, name := range []string{"manifest.json", "main.js", "styles.css"} {
 		if !seen[name] {
